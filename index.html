@@ -52,10 +52,6 @@
             will-change: transform, left, top;
         }
 
-        .document:active {
-            cursor: grabbing;
-        }
-
         .document::before {
             content: '';
             position: absolute;
@@ -97,7 +93,7 @@
             font-weight: bold;
         }
 
-        /* Modal & UI */
+        /* Paper UI */
         .paper-detail {
             background-color: var(--paper-light);
             background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
@@ -110,15 +106,16 @@
             overflow-y: auto;
         }
 
-        .stamp-red {
-            border: 3px solid #7a0000;
-            color: #7a0000;
-            padding: 5px 10px;
-            font-size: 1rem;
-            transform: rotate(-10deg);
+        .stamp {
+            border: 3px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 5px 15px;
+            font-size: 1.5rem;
+            transform: rotate(-15deg);
             display: inline-block;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             font-weight: bold;
+            opacity: 0.8;
         }
 
         #msgBox {
@@ -137,72 +134,93 @@
             font-family: 'Special Elite', cursive;
         }
 
-        .menu-btn {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #a1a1aa;
-            padding: 1rem 2rem;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            width: 250px;
-            background: rgba(255, 255, 255, 0.02);
-        }
-
+        /* Ending Screen Style */
         #endingScreen {
             display: none;
             position: fixed;
             inset: 0;
-            z-index: 500;
-            background: black;
-            padding: 2rem;
+            z-index: 1000;
+            background-color: rgba(0,0,0,0.95);
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .ending-paper {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            transform: scale(0.9);
+            animation: slideIn 0.5s forwards ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(50px) scale(0.8); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .typewriter-text {
+            border-right: 2px solid #333;
+            white-space: pre-wrap;
+            overflow: hidden;
+            font-size: 0.85rem;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
 
-    <div id="msgBox">TÜM DOSYALARI İNCELEMEDEN KARAR VEREMEZSİNİZ.</div>
+    <div id="msgBox">EKSİK DOSYALAR VAR. TÜM DELİLLERİ İNCELEMEDEN KARAR VEREMEZSİNİZ.</div>
 
     <!-- MAIN MENU -->
     <div id="mainMenu" class="fixed inset-0 bg-black z-[1000] flex flex-col items-center justify-center text-center p-4">
         <h1 class="font-['Special_Elite'] text-5xl text-stone-200 mb-2 tracking-tighter">COLD FILES</h1>
-        <p class="text-stone-600 tracking-[0.4em] mb-12 uppercase text-[10px]">Vaka: 34 TKR 22</p>
-        <button onclick="startGame()" class="menu-btn !bg-stone-200 !text-black !font-bold">Dosyayı Aç</button>
+        <p class="text-stone-600 tracking-[0.4em] mb-12 uppercase text-[10px]">Vaka Dosyası: #34-TKR</p>
+        <button onclick="startGame()" class="border border-white/20 bg-stone-200 text-black px-12 py-4 font-bold uppercase text-xs">Arşivi Aç</button>
     </div>
 
+    <!-- HEADER -->
     <header id="gameHeader" class="hidden fixed top-0 w-full z-50 flex justify-between px-4 py-3 bg-black/95 border-b border-white/5">
-        <span class="text-stone-500 font-bold text-[8px] uppercase self-center">EGM ADLİ ARŞİV</span>
-        <button onclick="attemptFinalize()" id="finalBtn" class="text-[8px] text-stone-800 bg-stone-900 px-4 py-1 uppercase transition-colors">Karar Ver</button>
+        <span class="text-stone-500 font-bold text-[8px] uppercase self-center tracking-widest">EGM ADLİ ARŞİV BÜROSU</span>
+        <button onclick="attemptFinalize()" id="finalBtn" class="text-[9px] text-stone-700 bg-stone-950 border border-white/5 px-4 py-1 uppercase transition-all">Kararı Açıkla</button>
     </header>
 
     <main id="desk" class="opacity-0 transition-opacity duration-1000"></main>
 
-    <!-- Modal -->
+    <!-- DOCUMENT MODAL -->
     <div id="docModal" class="fixed inset-0 z-[100] bg-black/95 hidden flex flex-col items-center justify-center p-4">
         <div class="paper-detail w-full relative">
             <div id="modalContent" class="text-sm leading-relaxed"></div>
         </div>
-        <button onclick="closeModal()" class="mt-6 w-full bg-stone-800 text-stone-200 py-4 text-[10px] uppercase tracking-widest">Dosyayı Geri Koy</button>
+        <button onclick="closeModal()" class="mt-6 w-full bg-stone-900 border border-white/10 text-stone-300 py-4 text-[10px] uppercase tracking-widest">Dosyayı Yerine Koy</button>
     </div>
 
-    <!-- Decision -->
-    <div id="finalModal" class="fixed inset-0 z-[200] bg-black/99 hidden flex items-center justify-center p-4">
+    <!-- DECISION MODAL -->
+    <div id="finalModal" class="fixed inset-0 z-[200] bg-black/98 hidden flex items-center justify-center p-4">
         <div class="w-full max-w-xs p-8 bg-zinc-950 border border-white/5 text-center">
-            <h2 class="text-stone-400 text-lg font-['Special_Elite'] mb-8 uppercase">FAİL KİM?</h2>
+            <h2 class="text-stone-500 text-xs font-['Special_Elite'] mb-8 uppercase tracking-[0.3em]">RESMİ SUÇLAMA</h2>
             <div id="suspectList" class="space-y-3"></div>
-            <button onclick="hideFinalize()" class="mt-8 text-[8px] text-stone-700 uppercase underline">Dosyaya Dön</button>
+            <button onclick="hideFinalize()" class="mt-8 text-[8px] text-stone-700 uppercase underline">İncelemeye Devam Et</button>
         </div>
     </div>
 
-    <!-- Ending Screen -->
+    <!-- NEW ENDING SCREEN UI -->
     <div id="endingScreen">
-        <div class="paper-detail w-full max-w-sm">
-            <div id="endingStamp" class="stamp-red !text-2xl mb-4">VAKA KAPANDI</div>
-            <h3 id="endingTitle" class="text-lg font-bold mb-4 uppercase"></h3>
-            <p id="endingText" class="text-sm leading-loose text-left border-t border-black/10 pt-4"></p>
-            <button onclick="location.reload()" class="mt-8 w-full border border-black/20 py-2 text-[10px] uppercase font-bold">Arşive Dön</button>
+        <div class="ending-paper paper-detail">
+            <div id="endingStamp" class="stamp">VAKA KAPANDI</div>
+            <h3 id="endingTitle" class="text-xl font-bold mb-4 uppercase border-b border-black/20 pb-2">ADLİ RAPOR</h3>
+            <div id="endingBody" class="typewriter-text"></div>
+            <div class="mt-12 pt-4 border-t border-black/10 flex justify-between items-end">
+                <div class="text-[10px] text-stone-600">
+                    Tarih: 22.05.2024<br>
+                    Bölge: 4. Emniyet Amirliği
+                </div>
+                <div class="font-['Special_Elite'] text-xs opacity-50 italic">
+                    İmza / Mühür
+                </div>
+            </div>
+            <button onclick="location.reload()" class="mt-8 w-full bg-black text-white py-3 text-[10px] uppercase font-bold tracking-widest">SİSTEMDEN ÇIK</button>
         </div>
     </div>
 
@@ -214,9 +232,9 @@
         };
 
         const documents = {
-            crime_scene: { id: 'crime_scene', title: 'OLAY YERİ: 34 TKR 22', label: 'DELİL 01', content: '<div class="stamp-red">KANIT</div><p>Maktul Selim Aksoy direksiyon başında ölü bulundu. Sağ elinde <b>"C.Y."</b> yazılı gümüş kol düğmesi var. Araçta hastane personeline ait mavi galoş izi tespit edildi.</p>', x: 40, y: 100, rot: -4, inspected: false },
-            zeynep_statement: { id: 'zeynep_statement', title: 'İFADE: ZEYNEP A.', label: 'ŞÜPHELİ', content: '<p><b>Zeynep (Hemşire):</b> "Selim amca kalp hastasıydı. Fenalaşınca ona hastaneden aldığım pembe bir hap verdim ama işe yaramadı. Panikleyip kaçtım."</p>', x: 170, y: 140, rot: 3, inspected: false },
-            medical_report: { id: 'medical_report', title: 'OTOPSİ RAPORU', label: 'RAPOR', content: '<div class="stamp-red">GİZLİ</div><p>Ölüm sebebi: Kalp durması. Kan tahlilinde normalden 10 kat fazla <b>Digoksin</b> (Pembe hap) bulundu. Doz aşımı kasti gözüküyor.</p>', x: 60, y: 280, rot: -2, inspected: false }
+            crime_scene: { id: 'crime_scene', title: 'OLAY YERİ: ARAÇ İÇİ', label: 'KANIT 01', content: '<div class="stamp">KANIT</div><p>Maktul Selim Aksoy direksiyon başında ölü bulundu. Sağ avucunda <b>"C.Y."</b> işlemeli bir gümüş kol düğmesi var. Paspaslarda hastane personeline ait <b>mavi galoş</b> izi tespit edildi.</p>', x: 30, y: 120, rot: -5, inspected: false },
+            zeynep_statement: { id: 'zeynep_statement', title: 'İFADE: HEMŞİRE ZEYNEP', label: 'ŞÜPHELİ', content: '<p><b>Zeynep A:</b> "Selim amcanın kalbi sıkışınca ona hastaneden aldığım pembe bir hap verdim. İşe yaramayınca korkup kaçtım. Cemil Bey ile araları hiç iyi değildi."</p>', x: 180, y: 150, rot: 4, inspected: false },
+            medical_report: { id: 'medical_report', title: 'OTOPSİ BULGULARI', label: 'RAPOR 08', content: '<div class="stamp" style="border-color:#333; color:#333">GİZLİ</div><p>Ölüm sebebi: Akut kalp yetmezliği. Kan tahlilinde yüksek dozda <b>Digoksin</b> (Pembe Hap) saptandı. Maktulün bu kadar ilacı yanlışlıkla alması tıbben imkansız.</p>', x: 50, y: 300, rot: -2, inspected: false }
         };
 
         function playSnd(name) {
@@ -228,7 +246,7 @@
             playSnd('click');
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('gameHeader').classList.remove('hidden');
-            document.getElementById('desk').classList.add('opacity-1');
+            document.getElementById('desk').classList.add('opacity-100');
             document.getElementById('desk').style.opacity = "1";
             initDesk();
         }
@@ -239,7 +257,6 @@
                 const div = document.createElement('div');
                 div.className = 'document';
                 div.id = `doc-${doc.id}`;
-                
                 div.style.left = (window.innerWidth / 2 - 75) + 'px';
                 div.style.top = (window.innerHeight + 100) + 'px';
                 
@@ -252,13 +269,13 @@
                 desk.appendChild(div);
 
                 setTimeout(() => {
-                    div.style.transition = "all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+                    div.style.transition = "all 0.6s cubic-bezier(0.17, 0.67, 0.46, 1.2)";
                     div.style.opacity = "1";
                     div.style.left = doc.x + 'px';
                     div.style.top = doc.y + 'px';
                     div.style.transform = `rotate(${doc.rot}deg)`;
                     playSnd('toss');
-                }, index * 250);
+                }, index * 200);
 
                 setupPointerEvents(div, doc);
             });
@@ -272,14 +289,11 @@
 
             el.onpointerdown = (e) => {
                 el.setPointerCapture(e.pointerId);
-                isDragging = true;
-                moveCount = 0;
+                isDragging = true; moveCount = 0;
                 document.querySelectorAll('.document').forEach(d => d.style.zIndex = "10");
                 el.style.zIndex = "100";
-                startPointerX = e.clientX;
-                startPointerY = e.clientY;
-                startElementX = el.offsetLeft;
-                startElementY = el.offsetTop;
+                startPointerX = e.clientX; startPointerY = e.clientY;
+                startElementX = el.offsetLeft; startElementY = el.offsetTop;
                 el.style.transition = "none";
             };
 
@@ -289,23 +303,15 @@
                 const dy = e.clientY - startPointerY;
                 if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
                     moveCount++;
-                    let newX = startElementX + dx;
-                    let newY = startElementY + dy;
-                    const padding = 20;
-                    newX = Math.max(-padding, Math.min(window.innerWidth - 130, newX));
-                    newY = Math.max(60, Math.min(window.innerHeight - 90, newY));
-                    el.style.left = newX + 'px';
-                    el.style.top = newY + 'px';
+                    el.style.left = (startElementX + dx) + 'px';
+                    el.style.top = (startElementY + dy) + 'px';
                 }
             };
 
-            el.onpointerup = (e) => {
-                if (!isDragging) return;
+            el.onpointerup = () => {
                 isDragging = false;
                 if (moveCount < 5) openDoc(doc.id);
             };
-
-            el.onpointercancel = () => { isDragging = false; };
         }
 
         function openDoc(id) {
@@ -314,27 +320,28 @@
             document.getElementById(`mark-${id}`).innerText = '✓';
             document.getElementById('modalContent').innerHTML = documents[id].content;
             document.getElementById('docModal').classList.remove('hidden');
-            checkStatus();
+            checkProgress();
         }
 
-        function checkStatus() {
+        function checkProgress() {
             if (Object.values(documents).every(d => d.inspected)) {
-                const b = document.getElementById('finalBtn');
-                b.classList.remove('bg-stone-900', 'text-stone-800');
-                b.classList.add('bg-stone-200', 'text-black', 'font-bold');
+                const btn = document.getElementById('finalBtn');
+                btn.classList.replace('bg-stone-950', 'bg-stone-200');
+                btn.classList.replace('text-stone-700', 'text-black');
+                btn.classList.add('font-bold');
             }
         }
 
         function attemptFinalize() {
             if (!Object.values(documents).every(d => d.inspected)) {
-                const m = document.getElementById('msgBox');
-                m.style.display = 'block';
-                setTimeout(() => m.style.display = 'none', 2500);
+                const box = document.getElementById('msgBox');
+                box.style.display = 'block';
+                setTimeout(() => box.style.display = 'none', 3000);
                 return;
             }
-            const l = document.getElementById('suspectList');
-            l.innerHTML = ['ZEYNEP A.', 'CEMİL YAKUT', 'DOĞAL ÖLÜM'].map(n => 
-                `<button onclick="finalizeGame('${n}')" class="w-full py-4 border border-white/10 text-stone-300 text-[10px] uppercase font-bold active:bg-white active:text-black">${n}</button>`
+            const list = document.getElementById('suspectList');
+            list.innerHTML = ['ZEYNEP A.', 'CEMİL YAKUT', 'KAZA / DOĞAL ÖLÜM'].map(name => 
+                `<button onclick="finalizeGame('${name}')" class="w-full py-4 border border-white/10 text-stone-300 text-[10px] uppercase font-bold active:bg-white active:text-black transition-colors">${name}</button>`
             ).join('');
             document.getElementById('finalModal').classList.remove('hidden');
         }
@@ -342,32 +349,41 @@
         function finalizeGame(decision) {
             playSnd('click');
             const screen = document.getElementById('endingScreen');
-            const title = document.getElementById('endingTitle');
-            const text = document.getElementById('endingText');
+            const body = document.getElementById('endingBody');
             const stamp = document.getElementById('endingStamp');
-
+            
             document.getElementById('finalModal').classList.add('hidden');
             screen.style.display = 'flex';
 
+            let reportText = "";
             if (decision === 'ZEYNEP A.') {
-                title.innerText = "KATİL YAKALANDI";
                 stamp.innerText = "ADALET YERİNİ BULDU";
-                stamp.style.color = "#0d2e0d";
-                stamp.style.borderColor = "#0d2e0d";
-                text.innerText = "Tebrikler dedektif. Zeynep'in 'pembe hap' itirafı ve otopsi raporundaki aşırı doz Digoksin eşleşti. Mavi galoş izleri de onun kaçarken bıraktığı son delildi. Vaka çözüldü.";
+                stamp.style.color = "#166534";
+                stamp.style.borderColor = "#166534";
+                reportText = "Tebrikler dedektif. Zeynep A.'nın itiraf ettiği pembe haplar, otopsi raporundaki aşırı doz bulgusuyla birebir örtüşüyor. Maktulün elindeki kol düğmesi ise şaşırtmacadan ibaretti. Katil parmaklıklar ardında.";
             } else if (decision === 'CEMİL YAKUT') {
-                title.innerText = "YANLIŞ KARAR";
                 stamp.innerText = "MASUM HAPİSTE";
-                stamp.style.color = "#7a0000";
-                stamp.style.borderColor = "#7a0000";
-                text.innerText = "Cemil Yakut suçsuzdu. Kol düğmesi maktulün boğuşurken kopardığı eski bir hatıraydı sadece. Asıl katil Zeynep hala dışarıda ve yeni kurbanını arıyor. Vicdanınla baş başasın.";
+                stamp.style.color = "#991b1b";
+                stamp.style.borderColor = "#991b1b";
+                reportText = "Hatalı karar. Cemil Yakut maktulün eski bir dostuydu ve o kol düğmesi yıllar önce hediye edilmişti. Gerçek katil Zeynep A. hala serbest. Adalet bu kez tecelli etmedi.";
             } else {
-                title.innerText = "YETERSİZ KANIT";
                 stamp.innerText = "FAİLİ MEÇHUL";
                 stamp.style.color = "#444";
                 stamp.style.borderColor = "#444";
-                text.innerText = "Dosyayı kapattın ama Selim Aksoy'un kanındaki 10 kat fazla ilacı açıklayamadın. Bu bir cinayetti ve sen katilin elini kolunu sallayarak gitmesine izin verdin.";
+                reportText = "Dosyayı kapattınız ancak Selim Aksoy'un kanındaki ölümcül dozdaki ilacı açıklayamadınız. Bu bir cinayetti ve faili elinizden kaçırdınız. Arşivde bir dosya daha tozlanmaya devam edecek.";
             }
+
+            // Simple Typewriter Effect
+            let i = 0;
+            body.innerText = "";
+            function type() {
+                if (i < reportText.length) {
+                    body.innerText += reportText.charAt(i);
+                    i++;
+                    setTimeout(type, 30);
+                }
+            }
+            setTimeout(type, 500);
         }
 
         function closeModal() { document.getElementById('docModal').classList.add('hidden'); }
