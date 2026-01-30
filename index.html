@@ -25,12 +25,12 @@
             width: 100vw;
             color: #888;
             margin: 0;
-            touch-action: none; /* Mobil kaydırmayı engelle */
+            touch-action: none;
         }
 
         .document {
             position: absolute;
-            width: 160px; /* Mobilde daha küçük dosyalar */
+            width: 160px;
             height: 120px;
             background-color: var(--folder-tan);
             box-shadow: 5px 5px 15px rgba(0,0,0,0.6);
@@ -40,7 +40,7 @@
             border: 1px solid var(--folder-darker);
             z-index: 10;
             opacity: 0; 
-            will-change: transform, opacity;
+            will-change: transform, opacity, left, top;
             touch-action: none;
         }
 
@@ -156,7 +156,6 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
-        /* Mobil Scroll Bar Gizleme */
         ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
@@ -166,7 +165,7 @@
 
     <!-- MAIN MENU -->
     <div id="mainMenu" class="fixed inset-0 bg-black z-[1000] flex flex-col items-center justify-center text-center p-4">
-        <div class="mb-2 px-2 py-1 border border-red-900/50 text-red-900 text-[8px] tracking-[0.2em] uppercase">Mobile v0.1.8</div>
+        <div class="mb-2 px-2 py-1 border border-red-900/50 text-red-900 text-[8px] tracking-[0.2em] uppercase">Mobile v0.1.8 Fix</div>
         <h1 class="font-['Special_Elite'] text-5xl text-stone-200 mb-2 tracking-tighter">COLD FILES</h1>
         <p class="text-stone-600 tracking-[0.5em] mb-12 uppercase text-[10px] ml-[0.5em]">Vaka: 34 TKR 22 / Taxi</p>
         
@@ -264,22 +263,22 @@
             crime_scene: {
                 id: 'crime_scene', title: 'OLAY YERİ: 34 TKR 22', label: 'KANIT 1',
                 content: `<div class="stamp-red">DELİL</div><p>Maktul Selim Aksoy direksiyon başında ölü bulundu. Sağ elinde <b>"C.Y."</b> yazılı gümüş kol düğmesi var. Yerde mavi bir galoş parçası bulundu.</p>`,
-                x: 40, y: 80, rot: -5, inspected: false
+                x: 30, y: 100, rot: -5, inspected: false
             },
             zeynep_statement: {
                 id: 'zeynep_statement', title: 'İFADE: ZEYNEP A.', label: 'ŞÜPHELİ',
                 content: `<p><b>Zeynep (Hemşire):</b> "Selim amcanın taksisine bindim. Fenalaşınca ona pembe bir hap verdim. Korkup kaçtım."</p>`,
-                x: 180, y: 120, rot: 4, inspected: false
+                x: 180, y: 140, rot: 4, inspected: false
             },
             medical_report: {
                 id: 'medical_report', title: 'TOKSİKOLOJİ', label: 'RAPOR',
                 content: `<div class="stamp-red">GİZLİ</div><p>Ölüm nedeni Kalp Durması. Kanda yüksek dozda <b>Digoksin</b> (Pembe hap) bulundu. Bu ilaç sadece hastanelerde bulunur.</p>`,
-                x: 60, y: 240, rot: -2, inspected: false
+                x: 50, y: 280, rot: -2, inspected: false
             },
             cemil_file: {
                 id: 'cemil_file', title: 'CEMİL YAKUT', label: 'ORTAK',
                 content: `<p><b>Cemil:</b> Maktulün ortağı. Sağ kol düğmesi eksik. Ancak tıbbi bilgisi veya ilaçlara erişimi yok.</p>`,
-                x: 190, y: 300, rot: 6, inspected: false
+                x: 200, y: 320, rot: 6, inspected: false
             }
         };
 
@@ -308,9 +307,8 @@
                 div.className = `document tossed`;
                 div.id = `doc-${doc.id}`;
                 
-                // Mobilde rastgele ama ekran içinde başlangıç
-                const startX = (Math.random() * 100) - 50;
-                const startY = 500;
+                const startX = (Math.random() * 200) - 100;
+                const startY = 600;
                 const startRot = (Math.random() * 60) - 30;
 
                 div.style.left = doc.x + 'px';
@@ -327,37 +325,57 @@
                     <div class="inspected-mark" id="mark-${doc.id}">${doc.inspected ? '✓' : ''}</div>
                 `;
                 
-                // Mobil tıklama ve sürükleme
-                let moved = false;
-                div.addEventListener('touchstart', (e) => { moved = false; handleTouchStart(e, div); }, {passive: false});
-                div.addEventListener('touchmove', () => { moved = true; }, {passive: false});
-                div.addEventListener('touchend', () => { if(!moved) openDoc(doc.id); });
+                let isDragging = false;
+                let startPos = {x:0, y:0};
+
+                div.addEventListener('touchstart', (e) => {
+                    isDragging = false;
+                    const touch = e.touches[0];
+                    startPos = {x: touch.clientX, y: touch.clientY};
+                    handleTouchStart(e, div, (dragged) => {
+                        isDragging = dragged;
+                    });
+                }, {passive: false});
+
+                div.addEventListener('touchend', (e) => {
+                    if(!isDragging) {
+                        openDoc(doc.id);
+                    }
+                });
 
                 desk.appendChild(div);
                 setTimeout(() => playSnd('toss'), (index * 200) + 400);
             });
         }
 
-        function handleTouchStart(e, el) {
-            el.classList.remove('tossed');
+        function handleTouchStart(e, el, setDragged) {
             const touch = e.touches[0];
             let offsetX = touch.clientX - el.offsetLeft;
             let offsetY = touch.clientY - el.offsetTop;
+            const startX = touch.clientX;
+            const startY = touch.clientY;
             
             document.querySelectorAll('.document').forEach(d => d.style.zIndex = "10");
             el.style.zIndex = "50";
 
             function move(e) {
                 const t = e.touches[0];
-                let nextX = t.clientX - offsetX;
-                let nextY = t.clientY - offsetY;
+                const dist = Math.hypot(t.clientX - startX, t.clientY - startY);
                 
-                // Ekran sınırları kontrolü
-                nextX = Math.max(0, Math.min(window.innerWidth - 160, nextX));
-                nextY = Math.max(50, Math.min(window.innerHeight - 120, nextY));
+                if (dist > 5) { // 5 pikselden fazla hareket ederse sürükleme say
+                    setDragged(true);
+                    el.classList.remove('tossed'); // Animasyonu durdur, kontrolü ele al
+                    el.style.transform = "none"; // CSS transformunu temizle ki left/top düzgün çalışsın
+                    
+                    let nextX = t.clientX - offsetX;
+                    let nextY = t.clientY - offsetY;
+                    
+                    nextX = Math.max(0, Math.min(window.innerWidth - 160, nextX));
+                    nextY = Math.max(50, Math.min(window.innerHeight - 120, nextY));
 
-                el.style.left = nextX + 'px';
-                el.style.top = nextY + 'px';
+                    el.style.left = nextX + 'px';
+                    el.style.top = nextY + 'px';
+                }
             }
 
             function end() {
