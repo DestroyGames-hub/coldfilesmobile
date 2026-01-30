@@ -146,6 +146,19 @@
             width: 250px;
             background: rgba(255, 255, 255, 0.02);
         }
+
+        #endingScreen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: black;
+            padding: 2rem;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -183,6 +196,16 @@
         </div>
     </div>
 
+    <!-- Ending Screen -->
+    <div id="endingScreen">
+        <div class="paper-detail w-full max-w-sm">
+            <div id="endingStamp" class="stamp-red !text-2xl mb-4">VAKA KAPANDI</div>
+            <h3 id="endingTitle" class="text-lg font-bold mb-4 uppercase"></h3>
+            <p id="endingText" class="text-sm leading-loose text-left border-t border-black/10 pt-4"></p>
+            <button onclick="location.reload()" class="mt-8 w-full border border-black/20 py-2 text-[10px] uppercase font-bold">Arşive Dön</button>
+        </div>
+    </div>
+
     <script>
         const audio = {
             toss: new Audio("https://files.catbox.moe/86fow3.mp3"),
@@ -217,7 +240,6 @@
                 div.className = 'document';
                 div.id = `doc-${doc.id}`;
                 
-                // Başlangıç (Ekran altı)
                 div.style.left = (window.innerWidth / 2 - 75) + 'px';
                 div.style.top = (window.innerHeight + 100) + 'px';
                 
@@ -229,7 +251,6 @@
 
                 desk.appendChild(div);
 
-                // Giriş animasyonu
                 setTimeout(() => {
                     div.style.transition = "all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
                     div.style.opacity = "1";
@@ -253,38 +274,26 @@
                 el.setPointerCapture(e.pointerId);
                 isDragging = true;
                 moveCount = 0;
-                
-                // Z-index yönetimi
                 document.querySelectorAll('.document').forEach(d => d.style.zIndex = "10");
                 el.style.zIndex = "100";
-                
-                // Başlangıç koordinatları
                 startPointerX = e.clientX;
                 startPointerY = e.clientY;
                 startElementX = el.offsetLeft;
                 startElementY = el.offsetTop;
-                
                 el.style.transition = "none";
-                el.style.cursor = "grabbing";
             };
 
             el.onpointermove = (e) => {
                 if (!isDragging) return;
-                
                 const dx = e.clientX - startPointerX;
                 const dy = e.clientY - startPointerY;
-
                 if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
                     moveCount++;
-                    
                     let newX = startElementX + dx;
                     let newY = startElementY + dy;
-
-                    // EKrandan fırlamayı önleyen bariyer (GÜVENLİK)
                     const padding = 20;
                     newX = Math.max(-padding, Math.min(window.innerWidth - 130, newX));
                     newY = Math.max(60, Math.min(window.innerHeight - 90, newY));
-
                     el.style.left = newX + 'px';
                     el.style.top = newY + 'px';
                 }
@@ -293,16 +302,7 @@
             el.onpointerup = (e) => {
                 if (!isDragging) return;
                 isDragging = false;
-                el.style.cursor = "grab";
-
-                // Eğer çok hareket etmediyse tıklama kabul et
-                if (moveCount < 5) {
-                    openDoc(doc.id);
-                } else {
-                    // Sürükleme bittiğinde hafif bir rotasyon koruması
-                    doc.x = el.offsetLeft;
-                    doc.y = el.offsetTop;
-                }
+                if (moveCount < 5) openDoc(doc.id);
             };
 
             el.onpointercancel = () => { isDragging = false; };
@@ -334,9 +334,36 @@
             }
             const l = document.getElementById('suspectList');
             l.innerHTML = ['ZEYNEP A.', 'CEMİL YAKUT', 'DOĞAL ÖLÜM'].map(n => 
-                `<button onclick="alert('${n} vakası sisteme işlendi.')" class="w-full py-4 border border-white/10 text-stone-300 text-[10px] uppercase font-bold active:bg-white active:text-black">${n}</button>`
+                `<button onclick="finalizeGame('${n}')" class="w-full py-4 border border-white/10 text-stone-300 text-[10px] uppercase font-bold active:bg-white active:text-black">${n}</button>`
             ).join('');
             document.getElementById('finalModal').classList.remove('hidden');
+        }
+
+        function finalizeGame(decision) {
+            playSnd('click');
+            const screen = document.getElementById('endingScreen');
+            const title = document.getElementById('endingTitle');
+            const text = document.getElementById('endingText');
+            const stamp = document.getElementById('endingStamp');
+
+            document.getElementById('finalModal').classList.add('hidden');
+            screen.style.display = 'flex';
+
+            if (decision === 'ZEYNEP A.') {
+                title.innerText = "KATİL YAKALANDI";
+                stamp.innerText = "ADALET YERİNİ BULDU";
+                stamp.style.color = "#0d2e0d";
+                stamp.style.borderColor = "#0d2e0d";
+                text.innerText = "Tebrikler dedektif. Zeynep'in 'pembe hap' itirafı ve otopsi raporundaki aşırı doz Digoksin eşleşti. Mavi galoş izleri de onun kaçarken bıraktığı son delildi. Vaka çözüldü.";
+            } else if (decision === 'CEMİL YAKUT') {
+                title.innerText = "YANLIŞ KARAR";
+                stamp.innerText = "MASUM HAPİSTE";
+                text.innerText = "Cemil Yakut suçsuzdu. Kol düğmesi maktulün boğuşurken kopardığı eski bir hatıraydı sadece. Asıl katil Zeynep hala dışarıda ve yeni kurbanını arıyor. Vicdanınla baş başasın.";
+            } else {
+                title.innerText = "YETERSİZ KANIT";
+                stamp.innerText = "FAİLİ MEÇHUL";
+                text.innerText = "Dosyayı kapattın ama Selim Aksoy'un kanındaki 10 kat fazla ilacı açıklayamadın. Bu bir cinayetti ve sen katilin elini kolunu sallayarak gitmesine izin verdin.";
+            }
         }
 
         function closeModal() { document.getElementById('docModal').classList.add('hidden'); }
