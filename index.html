@@ -165,7 +165,7 @@
 
     <!-- MAIN MENU -->
     <div id="mainMenu" class="fixed inset-0 bg-black z-[1000] flex flex-col items-center justify-center text-center p-4">
-        <div class="mb-2 px-2 py-1 border border-red-900/50 text-red-900 text-[8px] tracking-[0.2em] uppercase">Mobile v0.1.8 Fix</div>
+        <div class="mb-2 px-2 py-1 border border-red-900/50 text-red-900 text-[8px] tracking-[0.2em] uppercase">Mobile v0.1.9 Fix</div>
         <h1 class="font-['Special_Elite'] text-5xl text-stone-200 mb-2 tracking-tighter">COLD FILES</h1>
         <p class="text-stone-600 tracking-[0.5em] mb-12 uppercase text-[10px] ml-[0.5em]">Vaka: 34 TKR 22 / Taxi</p>
         
@@ -326,12 +326,9 @@
                 `;
                 
                 let isDragging = false;
-                let startPos = {x:0, y:0};
 
                 div.addEventListener('touchstart', (e) => {
                     isDragging = false;
-                    const touch = e.touches[0];
-                    startPos = {x: touch.clientX, y: touch.clientY};
                     handleTouchStart(e, div, (dragged) => {
                         isDragging = dragged;
                     });
@@ -350,8 +347,17 @@
 
         function handleTouchStart(e, el, setDragged) {
             const touch = e.touches[0];
-            let offsetX = touch.clientX - el.offsetLeft;
-            let offsetY = touch.clientY - el.offsetTop;
+            
+            // Mevcut pozisyonu dondur ve animasyonu temizle
+            const rect = el.getBoundingClientRect();
+            el.classList.remove('tossed');
+            el.style.opacity = "1";
+            el.style.transform = "none";
+            el.style.left = rect.left + 'px';
+            el.style.top = rect.top + 'px';
+
+            let offsetX = touch.clientX - rect.left;
+            let offsetY = touch.clientY - rect.top;
             const startX = touch.clientX;
             const startY = touch.clientY;
             
@@ -362,20 +368,20 @@
                 const t = e.touches[0];
                 const dist = Math.hypot(t.clientX - startX, t.clientY - startY);
                 
-                if (dist > 5) { // 5 pikselden fazla hareket ederse sürükleme say
+                if (dist > 8) { // Eşik değeri
                     setDragged(true);
-                    el.classList.remove('tossed'); // Animasyonu durdur, kontrolü ele al
-                    el.style.transform = "none"; // CSS transformunu temizle ki left/top düzgün çalışsın
                     
                     let nextX = t.clientX - offsetX;
                     let nextY = t.clientY - offsetY;
                     
+                    // Ekran sınırları
                     nextX = Math.max(0, Math.min(window.innerWidth - 160, nextX));
-                    nextY = Math.max(50, Math.min(window.innerHeight - 120, nextY));
+                    nextY = Math.max(60, Math.min(window.innerHeight - 120, nextY));
 
                     el.style.left = nextX + 'px';
                     el.style.top = nextY + 'px';
                 }
+                e.preventDefault();
             }
 
             function end() {
