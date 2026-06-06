@@ -32,8 +32,8 @@
         /* --- DOSYA GÖRÜNÜMÜ --- */
         .document {
             position: absolute;
-            width: 260px;
-            height: 190px;
+            width: 180px;
+            height: 130px;
             background-color: var(--folder-tan);
             box-shadow: 10px 10px 30px rgba(0,0,0,0.6);
             cursor: grab;
@@ -49,10 +49,10 @@
         .document::before {
             content: '';
             position: absolute;
-            top: -20px;
+            top: -15px;
             left: 0;
-            width: 100px;
-            height: 20px;
+            width: 70px;
+            height: 15px;
             background-color: var(--folder-tan);
             border-radius: 8px 25px 0 0;
             border-top: 1px solid var(--folder-darker);
@@ -92,9 +92,9 @@
 
         .document-title {
             font-family: 'Special Elite', cursive;
-            font-size: 0.8rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            padding: 40px 20px 10px 20px;
+            padding: 28px 12px 8px 12px;
             line-height: 1.3;
             color: #1a1510;
             pointer-events: none;
@@ -130,19 +130,19 @@
             font-family: 'Special Elite', cursive;
             box-shadow: 0 0 150px rgba(0,0,0,1);
             color: #1a1a1a;
-            padding: 4rem;
+            padding: 2rem;
             border: 1px solid #b0a080;
             pointer-events: auto; 
         }
 
         .stamp-red {
-            border: 4px solid #7a0000;
+            border: 3px solid #7a0000;
             color: #7a0000;
-            padding: 10px 25px;
-            font-size: 1.5rem;
+            padding: 6px 16px;
+            font-size: 1.1rem;
             transform: rotate(-12deg);
             display: inline-block;
-            margin-bottom: 2rem;
+            margin-bottom: 1.2rem;
             font-weight: bold;
             opacity: 0.8;
             font-family: 'Courier Prime', monospace;
@@ -191,12 +191,13 @@
         .menu-btn {
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #a1a1aa;
-            padding: 1rem 3rem;
+            padding: 0.85rem 2rem;
             transition: all 0.3s;
             text-transform: uppercase;
-            letter-spacing: 0.3em;
-            font-size: 0.75rem;
-            width: 300px;
+            letter-spacing: 0.2em;
+            font-size: 0.72rem;
+            width: 100%;
+            max-width: 260px;
             background: rgba(255, 255, 255, 0.02);
         }
 
@@ -267,11 +268,11 @@
             background-color: #f4f1ea;
             background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            padding: 3rem;
+            padding: 1.5rem;
             position: relative;
             transform: rotate(0.5deg);
             border: 1px solid #d4c5b0;
-            min-height: 400px;
+            min-height: 300px;
         }
         
         .report-header {
@@ -285,7 +286,7 @@
         .report-body {
             font-family: 'Courier Prime', monospace;
             color: #222;
-            font-size: 1.1rem;
+            font-size: 0.85rem;
             line-height: 1.6;
             text-align: justify;
         }
@@ -350,11 +351,13 @@
             background: rgba(0,0,0,0.95);
             border: 2px solid #7a0000;
             color: #e0d8cc;
-            padding: 40px;
+            padding: 24px;
             z-index: 2000;
             text-align: center;
             display: none;
             box-shadow: 0 0 100px rgba(0,0,0,1);
+            width: 88vw;
+            max-width: 380px;
         }
 
         /* --- CREDITS SCREEN --- */
@@ -448,76 +451,41 @@
 
         /* Mobil dokunma iyileştirmeleri */
         @media (max-width: 900px) and (orientation: landscape) {
-            /* Dosya kartları mobil için biraz küçültüldü */
-            .document {
-                width: 160px;
-                height: 120px;
-            }
-            .document::before {
-                width: 65px;
-                height: 14px;
-                top: -14px;
-            }
-            .document-title {
-                font-size: 0.6rem;
-                padding: 28px 12px 8px 12px;
-            }
-            .inspected-mark {
-                font-size: 16px;
-                bottom: 6px;
-                right: 6px;
-            }
-
             /* Header mobil */
             #gameHeader {
-                padding: 8px 12px;
-            }
-            #gameHeader .flex.gap-4 {
-                gap: 6px;
-            }
-            #gameHeader button {
-                padding: 6px 10px;
-                font-size: 9px;
-            }
-
-            /* Notlar paneli */
-            #notesPanel {
-                width: 220px;
-                height: 280px;
-                bottom: 8px;
-                right: 8px;
+                padding: 6px 8px;
             }
 
             /* Modal kağıt detay */
             .paper-detail {
-                padding: 1.5rem;
+                padding: 1rem;
             }
 
             /* Ayarlar paneli */
             #settingsPanel > div {
-                padding: 1.5rem;
+                padding: 1.2rem;
             }
 
             /* Level bildirimi */
             #levelNotify {
-                padding: 20px;
+                padding: 16px;
                 width: 90vw;
             }
 
             /* Sorgu odası */
             #interrogationModal > div {
-                padding: 1rem;
+                padding: 0.8rem;
                 max-height: 90vh;
                 overflow-y: auto;
             }
 
             /* Game over rapor */
             .report-paper {
-                padding: 1.5rem;
+                padding: 1rem;
             }
             .report-body {
-                font-size: 0.8rem;
-                min-height: 120px;
+                font-size: 0.75rem;
+                min-height: 100px;
             }
         }
 
@@ -541,24 +509,24 @@
 
     <!-- LEVEL NOTIFICATION -->
     <div id="levelNotify">
-        <h2 class="font-['Special_Elite'] text-4xl mb-4 text-[#7a0000]" id="lvlTitle">BÖLÜM 1</h2>
-        <p class="font-mono text-sm tracking-widest mb-8" id="lvlDesc">Dosyalar yüklendi...</p>
+        <h2 class="font-['Special_Elite'] text-3xl mb-3 text-[#7a0000]" id="lvlTitle">BÖLÜM 1</h2>
+        <p class="font-mono text-xs tracking-widest mb-6" id="lvlDesc">Dosyalar yüklendi...</p>
         <button onclick="closeLevelNotify()" class="px-8 py-2 border border-white/20 hover:bg-white/10 uppercase text-xs">Devam Et</button>
     </div>
 
     <!-- MAIN MENU -->
-    <div id="mainMenu" class="fixed inset-0 bg-black z-[1000] flex flex-col items-center justify-center text-center p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
-        <div class="mb-4 px-3 py-1 border border-red-900/50 text-red-900 text-[10px] tracking-[0.3em] uppercase animate-pulse">Şeytan Ayrıntıda Gizlidir</div>
-        <h1 class="font-['Special_Elite'] text-7xl md:text-8xl text-stone-200 mb-2 tracking-tighter shadow-xl">COLD FILES</h1>
-        <p class="text-stone-600 tracking-[1.5em] mb-16 uppercase text-xs md:text-sm ml-[1.5em]">Vaka: "Kızıl Ejder"</p>
+    <div id="mainMenu" class="fixed inset-0 bg-black z-[1000] flex flex-col items-center justify-center text-center p-4 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] overflow-hidden">
+        <div class="mb-3 px-3 py-1 border border-red-900/50 text-red-900 text-[9px] tracking-[0.25em] uppercase animate-pulse">Şeytan Ayrıntıda Gizlidir</div>
+        <h1 class="font-['Special_Elite'] text-5xl sm:text-6xl text-stone-200 mb-1 tracking-tighter shadow-xl">COLD FILES</h1>
+        <p class="text-stone-600 tracking-[0.8em] mb-8 uppercase text-[10px] ml-[0.8em]">Vaka: "Kızıl Ejder"</p>
         
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-3 w-full max-w-[260px]">
             <button onclick="startGame()" class="menu-btn !bg-stone-200 !text-black !font-bold border-none hover:!bg-white hover:!scale-105 transform duration-200">Dosyayı Aç</button>
             <button onclick="toggleSettings()" class="menu-btn">Ayarlar</button>
             <button onclick="toggleCredits()" class="menu-btn">Emeği Geçenler</button>
         </div>
 
-        <div class="mt-20 text-stone-800 text-[9px] tracking-widest uppercase italic">"Gerçekler asla yüzeyde değildir."</div>
+        <div class="mt-8 text-stone-800 text-[9px] tracking-widest uppercase italic">"Gerçekler asla yüzeyde değildir."</div>
     </div>
 
     <!-- CREDITS MODAL -->
@@ -576,27 +544,25 @@
     </div>
 
     <!-- GAME HEADER -->
-    <header id="gameHeader" class="hidden fixed top-0 w-full z-50 flex justify-between px-6 md:px-10 py-4 md:py-6 bg-black/90 border-b border-white/5 backdrop-blur-md">
-        <div class="flex flex-col">
-            <span class="text-stone-500 font-bold tracking-widest text-[10px] uppercase">Cinayet Masası - Özel Yetkili</span>
-            <span class="text-red-800 text-[10px] font-mono font-bold uppercase tracking-widest" id="headerPhaseInfo">BÖLÜM 1: OLAY YERİ</span>
+    <header id="gameHeader" class="hidden fixed top-0 w-full z-50 flex justify-between items-center px-3 py-2 bg-black/90 border-b border-white/5 backdrop-blur-md overflow-hidden">
+        <div class="flex flex-col shrink-0">
+            <span class="text-stone-500 font-bold tracking-widest text-[8px] uppercase leading-tight">Cinayet Masası</span>
+            <span class="text-red-800 text-[8px] font-mono font-bold uppercase tracking-wider" id="headerPhaseInfo">BÖLÜM 1</span>
         </div>
-        <div class="flex gap-4 md:gap-6 items-center">
-            <button onclick="toggleInterrogation()" class="text-[10px] text-red-500 border border-red-900/40 bg-red-900/10 px-6 py-2 hover:bg-red-900 hover:text-white uppercase transition-all tracking-wider animate-pulse">Sorgu Odası</button>
-            <button onclick="toggleNotes()" class="text-[10px] text-stone-500 border border-stone-800 px-6 py-2 hover:bg-white/5 uppercase transition-all">Not Defteri</button>
-            <button onclick="toggleSettings()" class="text-[10px] text-stone-400 border border-stone-800 px-4 py-2 hover:bg-white/5 uppercase transition-all">
-                Ayarlar
-            </button>
-            <button onclick="attemptFinalize()" id="finalBtn" class="text-[10px] text-stone-800 bg-stone-900 px-8 py-2 uppercase cursor-not-allowed transition-all border border-stone-800">Durumu Değerlendir</button>
+        <div class="flex gap-1.5 items-center flex-wrap justify-end">
+            <button onclick="toggleInterrogation()" class="text-[8px] text-red-500 border border-red-900/40 bg-red-900/10 px-2 py-1.5 hover:bg-red-900 hover:text-white uppercase transition-all tracking-wider animate-pulse whitespace-nowrap">Sorgu</button>
+            <button onclick="toggleNotes()" class="text-[8px] text-stone-500 border border-stone-800 px-2 py-1.5 hover:bg-white/5 uppercase transition-all whitespace-nowrap">Notlar</button>
+            <button onclick="toggleSettings()" class="text-[8px] text-stone-400 border border-stone-800 px-2 py-1.5 hover:bg-white/5 uppercase transition-all whitespace-nowrap">Ayarlar</button>
+            <button onclick="attemptFinalize()" id="finalBtn" class="text-[8px] text-stone-800 bg-stone-900 px-3 py-1.5 uppercase cursor-not-allowed transition-all border border-stone-800 whitespace-nowrap">Değerlendir</button>
         </div>
     </header>
 
     <!-- SETTINGS PANEL -->
-    <div id="settingsPanel" class="hidden fixed inset-0 z-[1100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
-        <div class="settings-panel max-w-lg w-full p-10 border border-white/10 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h2 class="text-stone-300 font-['Special_Elite'] text-2xl mb-8 uppercase tracking-widest text-center">Sistem Ayarları</h2>
+    <div id="settingsPanel" class="hidden fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="settings-panel w-full max-w-sm p-6 border border-white/10 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h2 class="text-stone-300 font-['Special_Elite'] text-xl mb-6 uppercase tracking-widest text-center">Sistem Ayarları</h2>
             
-            <div class="space-y-8 mb-12">
+            <div class="space-y-6 mb-8">
                 <!-- Volume -->
                 <div class="flex flex-col gap-3">
                     <div class="flex justify-between text-[10px] text-stone-500 uppercase tracking-widest">
@@ -607,21 +573,19 @@
                 </div>
 
                 <!-- Game Options -->
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="toggleFullscreen()" class="settings-sub-btn">Tam Ekran Yap/Çık</button>
+                <div class="grid grid-cols-1 gap-4">
                     <button onclick="showHowToPlay()" class="settings-sub-btn">Nasıl Oynanır?</button>
                 </div>
                 
                 <!-- How To Play Content (Hidden by default) -->
-                <div id="howToPlayContent" class="hidden text-stone-400 text-[11px] font-mono leading-relaxed border p-4 border-stone-800 bg-black/50">
-                    <strong class="text-stone-200 block mb-2">OPERASYON KILAVUZU:</strong>
-                    1. Bu vaka "Bölüm" usulü ilerler. Toplam 10 Bölüm vardır.<br>
-                    2. Mevcut dosyaları oku, çelişkileri not al.<br>
-                    3. Her bölümün sonunda sağ üstteki butona basarak o bölümün kilit sorusunu cevapla.<br>
-                    4. Şüphelileri sorgulamak için önce onların dosyasına ulaşman gerekir.<br>
-                    5. 10. Bölümden sonra (Final) asıl suç örgütünü çökert.<br>
-                    <br>
-                    <em class="text-red-900">Sabırlı ol. Ortalama süre: 30 - 40 Dakika.</em>
+                <div id="howToPlayContent" class="hidden text-stone-400 text-[11px] font-mono leading-loose border p-4 border-stone-800 bg-black/50 space-y-2">
+                    <p class="text-stone-200 font-bold text-xs uppercase tracking-widest mb-3 border-b border-stone-700 pb-2">OPERASYON KILAVUZU</p>
+                    <p>📁 Bu vaka <strong class="text-stone-300">10 Bölüm</strong> içerir.</p>
+                    <p>🔍 Masadaki dosyaları <strong class="text-stone-300">tıklayarak</strong> oku.</p>
+                    <p>📝 Bölüm biterken sağ üstteki <strong class="text-stone-300">"Durumu Değerlendir"</strong> butonuna bas.</p>
+                    <p>💬 Şüphelileri sorgulamak için önce <strong class="text-stone-300">dosyalarına ulaşman</strong> gerekir.</p>
+                    <p>⚖️ 10. Bölüm sonunda <strong class="text-stone-300">asıl suç örgütünü</strong> çökert.</p>
+                    <p class="text-red-900 italic pt-1">Sabırlı ol. Ortalama süre: 30–40 Dakika.</p>
                 </div>
 
             </div>
@@ -675,12 +639,12 @@
     <main id="desk" class="relative w-full h-full opacity-0 transition-opacity duration-1000 overflow-hidden"></main>
 
     <!-- UI PANELS -->
-    <div id="notesPanel" class="hidden fixed bottom-12 right-12 w-80 h-[450px] bg-[#111] border border-white/10 p-6 z-[60] shadow-2xl rotate-1">
-        <div class="text-[10px] text-stone-500 mb-4 uppercase tracking-tighter border-b border-stone-800 pb-2 flex justify-between">
+    <div id="notesPanel" class="hidden fixed bottom-4 right-4 w-64 h-64 bg-[#111] border border-white/10 p-4 z-[60] shadow-2xl rotate-1">
+        <div class="text-[10px] text-stone-500 mb-3 uppercase tracking-tighter border-b border-stone-800 pb-2 flex justify-between">
             <span>Komiserin Notları</span>
             <span class="cursor-pointer hover:text-white" onclick="toggleNotes()">X</span>
         </div>
-        <textarea id="notes" class="w-full h-[90%] bg-transparent border-none outline-none text-stone-400 font-serif leading-relaxed text-sm resize-none p-2" placeholder="Şüphelileri ve çelişkileri buraya yaz..."></textarea>
+        <textarea id="notes" class="w-full bg-transparent border-none outline-none text-stone-400 font-serif leading-relaxed text-sm resize-none p-1" style="height: calc(100% - 40px)" placeholder="Şüpheli notları..."></textarea>
     </div>
 
     <div id="docModal" onclick="if(event.target === this) closeModal()" class="fixed inset-0 z-[100] bg-black/30 hidden flex items-center justify-center p-4 md:p-12 cursor-pointer backdrop-blur-sm">
@@ -703,8 +667,8 @@
     </div>
 
     <!-- GAME OVER SCREEN: RESMİ RAPOR -->
-    <div id="gameOverScreen" class="fixed inset-0 bg-black z-[3000] hidden flex flex-col items-center justify-center p-4 md:p-12">
-        <div class="report-paper max-w-4xl w-full relative">
+    <div id="gameOverScreen" class="fixed inset-0 bg-black z-[3000] hidden flex flex-col items-center justify-center p-3 overflow-y-auto">
+        <div class="report-paper max-w-4xl w-full relative my-4">
             
             <div class="report-header">
                 <div class="text-[12px] text-black font-bold uppercase tracking-[0.4em] mb-2">T.C. ADALET BAKANLIĞI</div>
