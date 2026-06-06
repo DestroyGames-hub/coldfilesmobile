@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cold Files Mobile</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Cold Files</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
@@ -22,372 +25,1296 @@
             font-family: 'Courier Prime', monospace;
             overflow: hidden;
             height: 100vh;
-            width: 100vw;
             color: #888;
             margin: 0;
-            touch-action: none;
-            -webkit-user-select: none;
-            user-select: none;
         }
 
-        #desk {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
+        /* --- DOSYA GÖRÜNÜMÜ --- */
         .document {
             position: absolute;
-            width: 150px;
-            height: 110px;
+            width: 260px;
+            height: 190px;
             background-color: var(--folder-tan);
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.6);
+            box-shadow: 10px 10px 30px rgba(0,0,0,0.6);
             cursor: grab;
+            user-select: none;
             border-radius: 2px 8px 8px 2px;
             border: 1px solid var(--folder-darker);
             z-index: 10;
-            opacity: 0;
-            touch-action: none;
-            will-change: transform, left, top;
+            opacity: 0; 
+            will-change: transform, opacity;
+            transition: box-shadow 0.2s;
         }
 
         .document::before {
             content: '';
             position: absolute;
-            top: -10px;
+            top: -20px;
             left: 0;
-            width: 50px;
-            height: 10px;
+            width: 100px;
+            height: 20px;
             background-color: var(--folder-tan);
-            border-radius: 4px 12px 0 0;
+            border-radius: 8px 25px 0 0;
             border-top: 1px solid var(--folder-darker);
             border-left: 1px solid var(--folder-darker);
         }
 
+        .document:active { 
+            cursor: grabbing; 
+            z-index: 100 !important; 
+            box-shadow: 20px 20px 60px rgba(0,0,0,0.9);
+            transform: scale(1.05) rotate(var(--endRot)) !important;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* Fırlatma Animasyonu */
+        @keyframes ultraToss {
+            0% {
+                opacity: 0;
+                transform: translate3d(var(--startX), var(--startY), 400px) rotate(var(--startRot)) scale(2);
+            }
+            60% {
+                opacity: 1;
+                transform: translate3d(15px, 15px, 0) rotate(var(--midRot)) scale(1.05);
+            }
+            80% {
+                transform: translate3d(-5px, -5px, 10px) rotate(var(--endRot)) scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) rotate(var(--endRot)) scale(1);
+            }
+        }
+
+        .tossed {
+            animation: ultraToss 0.8s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+        }
+
         .document-title {
             font-family: 'Special Elite', cursive;
-            font-size: 0.6rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            padding: 20px 8px 5px 8px;
-            line-height: 1.2;
+            padding: 40px 20px 10px 20px;
+            line-height: 1.3;
             color: #1a1510;
             pointer-events: none;
+            overflow: hidden;
         }
 
         .folder-label {
             position: absolute;
-            top: -8px;
-            left: 6px;
-            font-size: 6px;
+            top: -16px;
+            left: 10px;
+            font-size: 10px;
             font-weight: bold;
-            color: rgba(0,0,0,0.5);
+            color: rgba(0,0,0,0.4);
+            z-index: 2;
+            letter-spacing: 1px;
         }
 
         .inspected-mark {
             position: absolute;
-            bottom: 5px;
-            right: 8px;
-            font-size: 12px;
-            color: #0d2e0d;
+            bottom: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: #1a471a;
             font-weight: bold;
+            font-family: 'Special Elite', cursive;
+            opacity: 0.8;
         }
 
-        /* Paper UI */
+        /* --- KAĞIT DETAYLARI --- */
         .paper-detail {
             background-color: var(--paper-light);
             background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
             font-family: 'Special Elite', cursive;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
+            box-shadow: 0 0 150px rgba(0,0,0,1);
             color: #1a1a1a;
-            padding: 1.5rem;
+            padding: 4rem;
             border: 1px solid #b0a080;
-            max-height: 80vh;
-            overflow-y: auto;
+            pointer-events: auto; 
         }
 
-        .stamp {
-            border: 3px solid var(--accent-red);
-            color: var(--accent-red);
-            padding: 5px 15px;
+        .stamp-red {
+            border: 4px solid #7a0000;
+            color: #7a0000;
+            padding: 10px 25px;
             font-size: 1.5rem;
-            transform: rotate(-15deg);
+            transform: rotate(-12deg);
             display: inline-block;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             font-weight: bold;
             opacity: 0.8;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .stamp-blue {
+            border: 3px solid #1e3a8a;
+            color: #1e3a8a;
+            padding: 5px 15px;
+            font-size: 1rem;
+            transform: rotate(5deg);
+            display: inline-block;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            opacity: 0.7;
         }
 
         #msgBox {
             position: fixed;
-            top: 20px;
+            top: 60px;
             left: 50%;
             transform: translateX(-50%);
             background: #7a0000;
             color: white;
-            padding: 10px 20px;
-            z-index: 2000;
+            padding: 12px 30px;
+            z-index: 1000;
             display: none;
-            font-size: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+            letter-spacing: 2px;
+            font-family: 'Special Elite', cursive;
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .settings-panel {
+            background: rgba(10, 9, 8, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        input[type=range] {
+            accent-color: #7a0000;
+            cursor: pointer;
+        }
+
+        .menu-btn {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a1a1aa;
+            padding: 1rem 3rem;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            font-size: 0.75rem;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .menu-btn:hover {
+            border-color: #7a0000;
+            color: white;
+            background: rgba(122, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(122, 0, 0, 0.2);
+        }
+
+        .settings-sub-btn {
+            padding: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.5);
+            color: #aaa;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+        .settings-sub-btn:hover {
+            border-color: #7a0000;
+            color: white;
+        }
+
+        /* --- SORGULAMA ODASI EFEKTLERİ --- */
+        .interrogation-light {
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.9) 70%);
+        }
+        
+        .good-cop-btn {
+            border: 1px solid #3b82f6;
+            color: #3b82f6;
+        }
+        .good-cop-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .bad-cop-btn {
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+        .bad-cop-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+        }
+
+        /* --- TELEGRAPH EFFECTS --- */
+        #endText {
+            min-height: 120px;
+        }
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: #111;
+            margin-left: 5px;
+            animation: blink 0.8s infinite;
+            vertical-align: middle;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* --- RAPOR EFEKTLERİ --- */
+        .report-paper {
+            background-color: #f4f1ea;
+            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 3rem;
+            position: relative;
+            transform: rotate(0.5deg);
+            border: 1px solid #d4c5b0;
+            min-height: 400px;
+        }
+        
+        .report-header {
             text-align: center;
-            width: 85%;
+            border-bottom: 2px solid #000;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
             font-family: 'Special Elite', cursive;
         }
 
-        /* Ending Screen Style */
-        #endingScreen {
+        .report-body {
+            font-family: 'Courier Prime', monospace;
+            color: #222;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        /* DAMGA EFEKTİ */
+        @keyframes stampSmash {
+            0% { opacity: 0; transform: scale(3) rotate(15deg); }
+            40% { opacity: 1; transform: scale(0.9) rotate(-5deg); }
+            60% { transform: scale(1.05) rotate(-5deg); }
+            100% { opacity: 0.9; transform: scale(1) rotate(-5deg); }
+        }
+
+        .final-stamp-box {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            width: 160px;
+            height: auto;
+            opacity: 0;
+            transform: rotate(-5deg);
+            pointer-events: none;
+            mix-blend-mode: multiply;
+            z-index: 10;
+        }
+
+        .final-stamp-box img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .stamp-animate {
+            animation: stampSmash 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* EKRAN SARSINTISI */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        
+        .shake-screen {
+            animation: shake 0.5s;
+            animation-iteration-count: 1;
+        }
+
+        /* Level Bildirimi */
+        #levelNotify {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            border: 2px solid #7a0000;
+            color: #e0d8cc;
+            padding: 40px;
+            z-index: 2000;
+            text-align: center;
+            display: none;
+            box-shadow: 0 0 100px rgba(0,0,0,1);
+        }
+
+        /* --- CREDITS SCREEN --- */
+        #creditsOverlay {
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        #creditsContent {
+            position: absolute;
+            top: 100%;
+            width: 100%;
+            text-align: center;
+            color: white;
+            padding-bottom: 100vh;
+        }
+
+        .credits-section {
+            margin-bottom: 5rem;
+        }
+
+        .credits-title {
+            color: #7a0000;
+            font-family: 'Special Elite', cursive;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 1rem;
+        }
+
+        .credits-name {
+            font-size: 1.2rem;
+            color: #ccc;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .credits-desc {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        .credits-main-title {
+            font-family: 'Special Elite', cursive;
+            font-size: 4rem;
+            margin-bottom: 10rem;
+            letter-spacing: 0.5em;
+            color: #fff;
+        }
+
+        /* ===== LANDSCAPE LOCK & MOBILE OPTIMIZATIONS ===== */
+
+        /* Portrait uyarı ekranı */
+        #portrait-warning {
             display: none;
             position: fixed;
             inset: 0;
-            z-index: 1000;
-            background-color: rgba(0,0,0,0.95);
+            background: #0a0908;
+            z-index: 99999;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            text-align: center;
+            padding: 2rem;
         }
 
-        .ending-paper {
-            width: 100%;
-            max-width: 400px;
-            position: relative;
-            transform: scale(0.9);
-            animation: slideIn 0.5s forwards ease-out;
+        @media screen and (orientation: portrait) {
+            #portrait-warning {
+                display: flex !important;
+            }
+            body > *:not(#portrait-warning) {
+                display: none !important;
+            }
         }
 
-        @keyframes slideIn {
-            from { transform: translateY(50px) scale(0.8); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
+        @media screen and (orientation: landscape) {
+            #portrait-warning {
+                display: none !important;
+            }
         }
 
-        .typewriter-text {
-            border-right: 2px solid #333;
-            white-space: pre-wrap;
-            overflow: hidden;
-            font-size: 0.85rem;
-            line-height: 1.6;
+        /* Mobil dokunma iyileştirmeleri */
+        @media (max-width: 900px) and (orientation: landscape) {
+            /* Dosya kartları mobil için biraz küçültüldü */
+            .document {
+                width: 160px;
+                height: 120px;
+            }
+            .document::before {
+                width: 65px;
+                height: 14px;
+                top: -14px;
+            }
+            .document-title {
+                font-size: 0.6rem;
+                padding: 28px 12px 8px 12px;
+            }
+            .inspected-mark {
+                font-size: 16px;
+                bottom: 6px;
+                right: 6px;
+            }
+
+            /* Header mobil */
+            #gameHeader {
+                padding: 8px 12px;
+            }
+            #gameHeader .flex.gap-4 {
+                gap: 6px;
+            }
+            #gameHeader button {
+                padding: 6px 10px;
+                font-size: 9px;
+            }
+
+            /* Notlar paneli */
+            #notesPanel {
+                width: 220px;
+                height: 280px;
+                bottom: 8px;
+                right: 8px;
+            }
+
+            /* Modal kağıt detay */
+            .paper-detail {
+                padding: 1.5rem;
+            }
+
+            /* Ayarlar paneli */
+            #settingsPanel > div {
+                padding: 1.5rem;
+            }
+
+            /* Level bildirimi */
+            #levelNotify {
+                padding: 20px;
+                width: 90vw;
+            }
+
+            /* Sorgu odası */
+            #interrogationModal > div {
+                padding: 1rem;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            /* Game over rapor */
+            .report-paper {
+                padding: 1.5rem;
+            }
+            .report-body {
+                font-size: 0.8rem;
+                min-height: 120px;
+            }
+        }
+
+        /* Tüm tıklanabilir alanlarda minimum dokunma boyutu */
+        button, [onclick] {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
     </style>
 </head>
 <body>
 
-    <div id="msgBox">EKSİK DOSYALAR VAR. TÜM DELİLLERİ İNCELEMEDEN KARAR VEREMEZSİNİZ.</div>
+    <!-- PORTRAIT UYARISI - Yatay yap -->
+    <div id="portrait-warning">
+        <div style="font-family:'Special Elite',cursive; color:#7a0000; font-size:3rem; margin-bottom:1rem;">↻</div>
+        <div style="font-family:'Special Elite',cursive; color:#e0d8cc; font-size:1.2rem; letter-spacing:0.2em; text-transform:uppercase; margin-bottom:0.5rem;">Cihazı Çevir</div>
+        <div style="font-family:'Courier Prime',monospace; color:#666; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase;">Bu oyun yatay modda oynanır</div>
+    </div>
+
+    <div id="msgBox">TÜM MEVCUT DOSYALARI İNCELEMEDEN İLERLEYEMEZSİN.</div>
+
+    <!-- LEVEL NOTIFICATION -->
+    <div id="levelNotify">
+        <h2 class="font-['Special_Elite'] text-4xl mb-4 text-[#7a0000]" id="lvlTitle">BÖLÜM 1</h2>
+        <p class="font-mono text-sm tracking-widest mb-8" id="lvlDesc">Dosyalar yüklendi...</p>
+        <button onclick="closeLevelNotify()" class="px-8 py-2 border border-white/20 hover:bg-white/10 uppercase text-xs">Devam Et</button>
+    </div>
 
     <!-- MAIN MENU -->
-    <div id="mainMenu" class="fixed inset-0 bg-black z-[1000] flex flex-col items-center justify-center text-center p-4">
-        <h1 class="font-['Special_Elite'] text-5xl text-stone-200 mb-2 tracking-tighter">COLD FILES</h1>
-        <p class="text-stone-600 tracking-[0.4em] mb-12 uppercase text-[10px]">Vaka Dosyası: #34-TKR</p>
-        <button onclick="startGame()" class="border border-white/20 bg-stone-200 text-black px-12 py-4 font-bold uppercase text-xs">Arşivi Aç</button>
+    <div id="mainMenu" class="fixed inset-0 bg-black z-[1000] flex flex-col items-center justify-center text-center p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
+        <div class="mb-4 px-3 py-1 border border-red-900/50 text-red-900 text-[10px] tracking-[0.3em] uppercase animate-pulse">Şeytan Ayrıntıda Gizlidir</div>
+        <h1 class="font-['Special_Elite'] text-7xl md:text-8xl text-stone-200 mb-2 tracking-tighter shadow-xl">COLD FILES</h1>
+        <p class="text-stone-600 tracking-[1.5em] mb-16 uppercase text-xs md:text-sm ml-[1.5em]">Vaka: "Kızıl Ejder"</p>
+        
+        <div class="flex flex-col gap-4">
+            <button onclick="startGame()" class="menu-btn !bg-stone-200 !text-black !font-bold border-none hover:!bg-white hover:!scale-105 transform duration-200">Dosyayı Aç</button>
+            <button onclick="toggleSettings()" class="menu-btn">Ayarlar</button>
+            <button onclick="toggleCredits()" class="menu-btn">Emeği Geçenler</button>
+        </div>
+
+        <div class="mt-20 text-stone-800 text-[9px] tracking-widest uppercase italic">"Gerçekler asla yüzeyde değildir."</div>
     </div>
 
-    <!-- HEADER -->
-    <header id="gameHeader" class="hidden fixed top-0 w-full z-50 flex justify-between px-4 py-3 bg-black/95 border-b border-white/5">
-        <span class="text-stone-500 font-bold text-[8px] uppercase self-center tracking-widest">EGM ADLİ ARŞİV BÜROSU</span>
-        <button onclick="attemptFinalize()" id="finalBtn" class="text-[9px] text-stone-700 bg-stone-950 border border-white/5 px-4 py-1 uppercase transition-all">Kararı Açıkla</button>
+    <!-- CREDITS MODAL -->
+    <div id="creditsModal" class="hidden fixed inset-0 z-[1200] bg-black/95 flex items-center justify-center p-6" onclick="toggleCredits()">
+        <div class="max-w-md w-full text-center space-y-8" onclick="event.stopPropagation()">
+            <h2 class="text-stone-500 font-['Special_Elite'] text-3xl uppercase tracking-widest">Emeği Geçenler</h2>
+            <div class="space-y-4 font-mono text-xs tracking-widest text-stone-400">
+                <p><span class="text-stone-600">YAPIM:</span>Destroy Games</p>
+                <p><span class="text-stone-600">SENARYO:</span>Bora KARAAĞAÇ</p>
+                <p><span class="text-stone-600">TASARIM:</span>Destroy Studios</p>
+                <p><span class="text-stone-600">SES:</span>Destroy Music</p>
+            </div>
+            <button onclick="toggleCredits()" class="mt-8 text-stone-600 hover:text-white transition-colors text-[10px] uppercase border-b border-stone-800">Geri</button>
+        </div>
+    </div>
+
+    <!-- GAME HEADER -->
+    <header id="gameHeader" class="hidden fixed top-0 w-full z-50 flex justify-between px-6 md:px-10 py-4 md:py-6 bg-black/90 border-b border-white/5 backdrop-blur-md">
+        <div class="flex flex-col">
+            <span class="text-stone-500 font-bold tracking-widest text-[10px] uppercase">Cinayet Masası - Özel Yetkili</span>
+            <span class="text-red-800 text-[10px] font-mono font-bold uppercase tracking-widest" id="headerPhaseInfo">BÖLÜM 1: OLAY YERİ</span>
+        </div>
+        <div class="flex gap-4 md:gap-6 items-center">
+            <button onclick="toggleInterrogation()" class="text-[10px] text-red-500 border border-red-900/40 bg-red-900/10 px-6 py-2 hover:bg-red-900 hover:text-white uppercase transition-all tracking-wider animate-pulse">Sorgu Odası</button>
+            <button onclick="toggleNotes()" class="text-[10px] text-stone-500 border border-stone-800 px-6 py-2 hover:bg-white/5 uppercase transition-all">Not Defteri</button>
+            <button onclick="toggleSettings()" class="text-[10px] text-stone-400 border border-stone-800 px-4 py-2 hover:bg-white/5 uppercase transition-all">
+                Ayarlar
+            </button>
+            <button onclick="attemptFinalize()" id="finalBtn" class="text-[10px] text-stone-800 bg-stone-900 px-8 py-2 uppercase cursor-not-allowed transition-all border border-stone-800">Durumu Değerlendir</button>
+        </div>
     </header>
 
-    <main id="desk" class="opacity-0 transition-opacity duration-1000"></main>
-
-    <!-- DOCUMENT MODAL -->
-    <div id="docModal" class="fixed inset-0 z-[100] bg-black/95 hidden flex flex-col items-center justify-center p-4">
-        <div class="paper-detail w-full relative">
-            <div id="modalContent" class="text-sm leading-relaxed"></div>
-        </div>
-        <button onclick="closeModal()" class="mt-6 w-full bg-stone-900 border border-white/10 text-stone-300 py-4 text-[10px] uppercase tracking-widest">Dosyayı Yerine Koy</button>
-    </div>
-
-    <!-- DECISION MODAL -->
-    <div id="finalModal" class="fixed inset-0 z-[200] bg-black/98 hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-xs p-8 bg-zinc-950 border border-white/5 text-center">
-            <h2 class="text-stone-500 text-xs font-['Special_Elite'] mb-8 uppercase tracking-[0.3em]">RESMİ SUÇLAMA</h2>
-            <div id="suspectList" class="space-y-3"></div>
-            <button onclick="hideFinalize()" class="mt-8 text-[8px] text-stone-700 uppercase underline">İncelemeye Devam Et</button>
-        </div>
-    </div>
-
-    <!-- NEW ENDING SCREEN UI -->
-    <div id="endingScreen">
-        <div class="ending-paper paper-detail">
-            <div id="endingStamp" class="stamp">VAKA KAPANDI</div>
-            <h3 id="endingTitle" class="text-xl font-bold mb-4 uppercase border-b border-black/20 pb-2">ADLİ RAPOR</h3>
-            <div id="endingBody" class="typewriter-text"></div>
-            <div class="mt-12 pt-4 border-t border-black/10 flex justify-between items-end">
-                <div class="text-[10px] text-stone-600">
-                    Tarih: 22.05.2024<br>
-                    Bölge: 4. Emniyet Amirliği
+    <!-- SETTINGS PANEL -->
+    <div id="settingsPanel" class="hidden fixed inset-0 z-[1100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+        <div class="settings-panel max-w-lg w-full p-10 border border-white/10 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h2 class="text-stone-300 font-['Special_Elite'] text-2xl mb-8 uppercase tracking-widest text-center">Sistem Ayarları</h2>
+            
+            <div class="space-y-8 mb-12">
+                <!-- Volume -->
+                <div class="flex flex-col gap-3">
+                    <div class="flex justify-between text-[10px] text-stone-500 uppercase tracking-widest">
+                        <label>Ses Seviyesi</label>
+                        <span id="volVal">50%</span>
+                    </div>
+                    <input type="range" id="volumeControl" min="0" max="100" value="50" oninput="updateVolume(this.value)" class="w-full h-1 bg-stone-800 rounded-lg appearance-none cursor-pointer">
                 </div>
-                <div class="font-['Special_Elite'] text-xs opacity-50 italic">
-                    İmza / Mühür
+
+                <!-- Game Options -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="toggleFullscreen()" class="settings-sub-btn">Tam Ekran Yap/Çık</button>
+                    <button onclick="showHowToPlay()" class="settings-sub-btn">Nasıl Oynanır?</button>
                 </div>
+                
+                <!-- How To Play Content (Hidden by default) -->
+                <div id="howToPlayContent" class="hidden text-stone-400 text-[11px] font-mono leading-relaxed border p-4 border-stone-800 bg-black/50">
+                    <strong class="text-stone-200 block mb-2">OPERASYON KILAVUZU:</strong>
+                    1. Bu vaka "Bölüm" usulü ilerler. Toplam 10 Bölüm vardır.<br>
+                    2. Mevcut dosyaları oku, çelişkileri not al.<br>
+                    3. Her bölümün sonunda sağ üstteki butona basarak o bölümün kilit sorusunu cevapla.<br>
+                    4. Şüphelileri sorgulamak için önce onların dosyasına ulaşman gerekir.<br>
+                    5. 10. Bölümden sonra (Final) asıl suç örgütünü çökert.<br>
+                    <br>
+                    <em class="text-red-900">Sabırlı ol. Ortalama süre: 30 - 40 Dakika.</em>
+                </div>
+
             </div>
-            <button onclick="location.reload()" class="mt-8 w-full bg-black text-white py-3 text-[10px] uppercase font-bold tracking-widest">SİSTEMDEN ÇIK</button>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="toggleSettings()" class="w-full py-4 bg-stone-200 text-black text-xs uppercase font-bold tracking-widest hover:bg-white transition-all">Tamam</button>
+                <button id="quitBtn" onclick="quitToMenu()" class="hidden w-full py-4 border border-red-900/30 text-red-900 text-[10px] uppercase tracking-widest hover:bg-red-900 hover:text-white transition-all">Ana Menüye Dön</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INTERROGATION MODAL -->
+    <div id="interrogationModal" class="hidden fixed inset-0 z-[1100] bg-black/98 flex items-center justify-center p-6 interrogation-light">
+        <div class="max-w-2xl w-full p-8 border border-white/5 relative bg-black/40 backdrop-blur-md">
+            <!-- Close Button -->
+            <button onclick="toggleInterrogation()" class="absolute top-4 right-4 text-stone-600 hover:text-white text-xs uppercase">Kapat</button>
+            
+            <h2 class="text-stone-400 font-['Special_Elite'] text-2xl mb-8 uppercase tracking-[0.3em] text-center border-b border-white/10 pb-4">Sorgu Odası</h2>
+            <p class="text-center text-stone-600 text-[10px] mb-4 uppercase tracking-widest">Sadece dosyası açılmış şüpheliler sorguya alınabilir</p>
+
+            <!-- Screen 1: Suspect Selection -->
+            <div id="int-select-screen" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Screen 2: Interaction -->
+            <div id="int-interaction-screen" class="hidden flex flex-col items-center">
+                <div class="w-24 h-24 bg-stone-900 rounded-full border border-stone-700 mb-6 flex items-center justify-center overflow-hidden grayscale">
+                    <span id="int-avatar" class="text-4xl text-stone-700">?</span>
+                </div>
+                <h3 id="int-name" class="text-stone-200 text-lg uppercase tracking-widest mb-6 font-bold"></h3>
+                
+                <div class="w-full bg-black/50 border border-white/10 p-6 mb-8 h-32 overflow-y-auto">
+                    <p id="int-text" class="text-stone-400 font-['Courier_Prime'] text-sm leading-relaxed italic">"..."</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6 w-full">
+                    <button onclick="conductInterrogation('good')" class="good-cop-btn py-4 px-2 text-[10px] uppercase tracking-widest transition-all">
+                        <span class="block font-bold text-lg mb-1">Nazikçe Sor</span>
+                    </button>
+                    <button onclick="conductInterrogation('bad')" class="bad-cop-btn py-4 px-2 text-[10px] uppercase tracking-widest transition-all">
+                        <span class="block font-bold text-lg mb-1">Sıkıştır</span>
+                    </button>
+                </div>
+                
+                <button onclick="resetInterrogation()" class="mt-8 text-stone-600 hover:text-stone-400 text-[9px] uppercase tracking-widest">Başka Birini Sorgula</button>
+            </div>
+        </div>
+    </div>
+
+    <main id="desk" class="relative w-full h-full opacity-0 transition-opacity duration-1000 overflow-hidden"></main>
+
+    <!-- UI PANELS -->
+    <div id="notesPanel" class="hidden fixed bottom-12 right-12 w-80 h-[450px] bg-[#111] border border-white/10 p-6 z-[60] shadow-2xl rotate-1">
+        <div class="text-[10px] text-stone-500 mb-4 uppercase tracking-tighter border-b border-stone-800 pb-2 flex justify-between">
+            <span>Komiserin Notları</span>
+            <span class="cursor-pointer hover:text-white" onclick="toggleNotes()">X</span>
+        </div>
+        <textarea id="notes" class="w-full h-[90%] bg-transparent border-none outline-none text-stone-400 font-serif leading-relaxed text-sm resize-none p-2" placeholder="Şüphelileri ve çelişkileri buraya yaz..."></textarea>
+    </div>
+
+    <div id="docModal" onclick="if(event.target === this) closeModal()" class="fixed inset-0 z-[100] bg-black/30 hidden flex items-center justify-center p-4 md:p-12 cursor-pointer backdrop-blur-sm">
+        <div class="paper-detail max-w-3xl w-full h-auto max-h-[90vh] overflow-y-auto relative cursor-auto shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+            <button onclick="closeModal()" class="sticky top-0 float-right text-stone-500 border border-stone-400 px-4 py-1 text-[10px] hover:bg-red-900 hover:text-white hover:border-red-900 uppercase transition-all z-50 bg-stone-200">Kapat</button>
+            <div id="modalContent" class="mt-8"></div>
+        </div>
+    </div>
+
+    <!-- GENERIC CHOICE MODAL (Used for Chapter Quizzes & Final) -->
+    <div id="choiceModal" class="fixed inset-0 z-[200] bg-black/99 hidden flex items-center justify-center overflow-y-auto p-4">
+        <div class="max-w-2xl w-full p-8 md:p-12 bg-zinc-950 border border-white/5 shadow-2xl my-auto">
+            <h2 id="choiceTitle" class="text-stone-400 text-xl font-['Special_Elite'] mb-4 uppercase tracking-widest text-center border-b border-white/10 pb-4">DURUM DEĞERLENDİRMESİ</h2>
+            <p id="choiceDesc" class="text-stone-600 text-xs mb-8 text-center font-mono">Soruşturmanın seyrini belirleyecek kararı ver.</p>
+            
+            <div id="choiceList" class="grid grid-cols-1 gap-4"></div>
+            
+            <button onclick="hideChoiceModal()" class="mt-12 w-full text-[9px] text-stone-500 uppercase tracking-[0.3em] hover:text-stone-300 transition-all border-t border-white/10 pt-4">Daha Bakmam Gereken Deliller Var</button>
+        </div>
+    </div>
+
+    <!-- GAME OVER SCREEN: RESMİ RAPOR -->
+    <div id="gameOverScreen" class="fixed inset-0 bg-black z-[3000] hidden flex flex-col items-center justify-center p-4 md:p-12">
+        <div class="report-paper max-w-4xl w-full relative">
+            
+            <div class="report-header">
+                <div class="text-[12px] text-black font-bold uppercase tracking-[0.4em] mb-2">T.C. ADALET BAKANLIĞI</div>
+                <div class="text-[10px] text-gray-600 font-mono">CİNAYET BÜRO AMİRLİĞİ | VAKA: KIZIL EJDER</div>
+                <div class="text-2xl mt-4 font-bold border-t border-b border-black py-2 inline-block">VAKA KAPANIŞ RAPORU</div>
+            </div>
+
+            <div class="report-body relative min-h-[200px] mb-12">
+                <span id="endText"></span><span id="telegraphCursor" class="cursor hidden"></span>
+            </div>
+
+            <div class="flex justify-between items-end mt-8 border-t border-gray-400 pt-6">
+                <div class="text-xs text-gray-500 font-mono">
+                    <p>RAPORTÖR: BAŞKOMİSER</p>
+                    <p>TARİH: <span id="currentDate"></span></p>
+                    <p>İMZA: @é&</p>
+                </div>
+                
+                <!-- STAMP AREA -->
+                <div id="finalStamp" class="final-stamp-box"></div>
+            </div>
+
+            <!-- Retry button overlaid -->
+            <div id="restartContainer" class="hidden absolute -bottom-20 left-0 w-full text-center">
+                 <button onclick="startFinalCredits()" class="border border-stone-500 bg-black text-stone-400 px-8 py-3 hover:border-white hover:text-white transition-all uppercase text-xs tracking-[0.3em]">Oyunu Bitir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FINAL CREDITS OVERLAY -->
+    <div id="creditsOverlay">
+        <div id="creditsContent">
+            <div class="credits-main-title">COLD FILES</div>
+            <div id="dynamicCredits"></div>
         </div>
     </div>
 
     <script>
-        const audio = {
-            toss: new Audio("https://files.catbox.moe/86fow3.mp3"),
-            open: new Audio("https://files.catbox.moe/66nmvd.mp3"),
-            click: new Audio("https://files.catbox.moe/vtwizg.mp3")
+        // --- STATE & AUDIO ---
+        let currentGlobalVolume = 0.5;
+        let currentLevel = 1; 
+        const MAX_LEVEL = 10; 
+
+        const customTossSound = "https://files.catbox.moe/86fow3.mp3"; 
+        const paperCrinkleSound = "https://files.catbox.moe/66nmvd.mp3"; 
+        const clickSoundEffect = "https://files.catbox.moe/vtwizg.mp3";
+        const telegraphLoopSound = "https://files.catbox.moe/svl419.mp3"; 
+        const stampBaseSound = "https://files.catbox.moe/vtwizg.mp3"; 
+        const creditsThemeUrl = "https://files.catbox.moe/81xklq.mp3";
+
+        const audioPool = {
+            toss: [],
+            open: new Audio(paperCrinkleSound),
+            close: new Audio(paperCrinkleSound),
+            error: new Audio(paperCrinkleSound),
+            click: new Audio(clickSoundEffect),
+            typeLoop: new Audio(telegraphLoopSound),
+            stamp: new Audio(stampBaseSound),
+            creditsTheme: new Audio(creditsThemeUrl)
         };
+
+        audioPool.typeLoop.loop = true;
+
+        for(let i=0; i<8; i++) {
+            const a = new Audio(customTossSound);
+            a.preload = "auto";
+            audioPool.toss.push(a);
+        }
+
+        function applyAudioVolumes() {
+            audioPool.open.volume = currentGlobalVolume;
+            audioPool.close.volume = currentGlobalVolume * 0.7;
+            audioPool.error.volume = currentGlobalVolume * 0.8;
+            audioPool.click.volume = currentGlobalVolume * 0.4;
+            audioPool.typeLoop.volume = currentGlobalVolume * 0.5;
+            audioPool.stamp.volume = Math.min(1.0, currentGlobalVolume * 1.5);
+            audioPool.creditsTheme.volume = currentGlobalVolume;
+            audioPool.toss.forEach(s => s.volume = currentGlobalVolume * 0.8);
+        }
+
+        function playClickSound() {
+            audioPool.click.currentTime = 0;
+            audioPool.click.play().catch(()=>{});
+        }
+
+        applyAudioVolumes();
 
         const documents = {
-            crime_scene: { id: 'crime_scene', title: 'OLAY YERİ: ARAÇ İÇİ', label: 'KANIT 01', content: '<div class="stamp">KANIT</div><p>Maktul Selim Aksoy direksiyon başında ölü bulundu. Sağ avucunda <b>"C.Y."</b> işlemeli bir gümüş kol düğmesi var. Paspaslarda hastane personeline ait <b>mavi galoş</b> izi tespit edildi.</p>', x: 30, y: 120, rot: -5, inspected: false },
-            zeynep_statement: { id: 'zeynep_statement', title: 'İFADE: HEMŞİRE ZEYNEP', label: 'ŞÜPHELİ', content: '<p><b>Zeynep A:</b> "Selim amcanın kalbi sıkışınca ona hastaneden aldığım pembe bir hap verdim. İşe yaramayınca korkup kaçtım. Cemil Bey ile araları hiç iyi değildi."</p>', x: 180, y: 150, rot: 4, inspected: false },
-            medical_report: { id: 'medical_report', title: 'OTOPSİ BULGULARI', label: 'RAPOR 08', content: '<div class="stamp" style="border-color:#333; color:#333">GİZLİ</div><p>Ölüm sebebi: Akut kalp yetmezliği. Kan tahlilinde yüksek dozda <b>Digoksin</b> (Pembe Hap) saptandı. Maktulün bu kadar ilacı yanlışlıkla alması tıbben imkansız.</p>', x: 50, y: 300, rot: -2, inspected: false }
+            doc1: {
+                id: 'doc1', chapter: 1, title: 'OLAY YERİ: KORHAN YALISI', label: 'İLK RAPOR',
+                content: `<div class="stamp-red">DELİL NO: #1</div><h1 class="text-3xl mb-6 border-b border-stone-800 pb-2">Olay Yeri İnceleme</h1><p class="text-sm font-mono mb-4 text-stone-600">TARİH: 26.01.2024 | SAAT: 23:45</p><div class="space-y-4 text-lg leading-relaxed"><p><strong>Maktul:</strong> Vedat Korhan (55). Çalışma odasında ölü bulundu.</p><p><strong>Ortam:</strong> Odada kırık bir şarap kadehi ve "Kızıl Ejder" isimli yeşim taşı heykel var.</p><p><strong>Dikkat Çekenler:</strong> Çöp kutusunda maktule ait olduğu doğrulanan <strong>siyah deri eldivenler</strong> bulundu. Maktul eldivensiz.</p></div>`,
+                x: 100, y: 120, rot: -5
+            },
+            doc10: {
+                id: 'doc10', chapter: 1, title: 'CESET İNCELEMESİ', label: 'FOTOĞRAF',
+                content: `<h1 class="text-3xl mb-6 border-b border-stone-800 pb-2">Ön Bulgular</h1><p class="text-lg">Maktulün yüzünde yoğun bir morarma ve kasılma mevcut. Ağız kenarında köpürme var. Eller pençe şeklinde kasılmış.</p><p class="mt-4 border p-4 bg-red-900/10 border-red-900"><strong>NOT:</strong> Tipik kalp krizi değil. Zehirli madde şüphesi. Sol el serçe parmağında eski bir yanık izi dikkat çekiyor.</p>`,
+                x: 150, y: 200, rot: 2
+            },
+            doc_extra1: {
+                id: 'doc_extra1', chapter: 1, title: 'HAVA DURUMU RAPORU', label: 'METEOROLOİ',
+                content: `<p class="font-mono text-sm">Olay gecesi İstanbul'da şiddetli lodos fırtınası hakimdi. Deniz ulaşımı 22:00 itibariyle durdurulmuştu. Yalıya denizden ulaşım imkansızdı.</p>`,
+                x: 300, y: 100, rot: 5
+            },
+            doc3: {
+                id: 'doc3', chapter: 2, title: 'ŞÜPHELİ: LEYLA KORHAN', label: 'EŞİ',
+                content: `<h1 class="text-3xl mb-6 border-b border-stone-800 pb-2">İfade: Leyla (Eşi)</h1><div class="space-y-4 text-lg leading-relaxed"><p>"Vedat ile boşanma aşamasındaydık. O parayı bana koklatmazdı."</p><p><strong>Polis Notu:</strong> Kredi kartı ekstresinde "Egzotik Bitki Tohumları" harcaması var. Evde zehirli bitkiler kitabı bulundu.</p></div>`,
+                x: 700, y: 100, rot: -2
+            },
+            doc4: {
+                id: 'doc4', chapter: 2, title: 'ŞÜPHELİ: KEREM SOYLU', label: 'İŞ ORTAĞI',
+                content: `<h1 class="text-3xl mb-6 border-b border-stone-800 pb-2">İfade: Kerem (Ortak)</h1><div class="space-y-4 text-lg leading-relaxed"><p>"Borcum vardı, tartıştık. Elimdeki şarabı yanlışlıkla üzerine döktüm. Çok sinirlendi."</p><p><strong>Olay Anı:</strong> "Şarabı dökünce Vedat eldivenlerini çıkarıp çöpe attı. Ben temizlenmek için lavaboya gittim."</p></div>`,
+                x: 200, y: 400, rot: 4
+            },
+            doc11: {
+                id: 'doc11', chapter: 2, title: 'KEREM\'İN CEBİNDEN ÇIKAN NOT', label: 'DELİL',
+                content: `<div class="stamp-red">EL KONULDU</div><p class="font-['Courier_Prime'] text-xl italic">"Vedat, bu işi bu gece bitirelim. Ya borcumu silersin ya da olacaklardan ben sorumlu değilim."</p><p class="text-sm mt-4 text-gray-500">Kerem'in ceketinin iç cebinde bulundu.</p>`,
+                x: 250, y: 450, rot: 10
+            },
+            doc_extra2: {
+                id: 'doc_extra2', chapter: 2, title: 'KEREM\'İN TELEFON KAYITLARI', label: 'HTS',
+                content: `<p class="font-mono">Olay saatinden hemen önce (23:10) "Bilinmeyen Numara" ile 4 dakikalık görüşme.</p><p class="mt-2 text-red-800 font-bold">Sesli Mesaj Dökümü: "Sakin ol Kerem. Plan bozulursa sen yanarsın."</p>`,
+                x: 350, y: 500, rot: -3
+            },
+            doc2: {
+                id: 'doc2', chapter: 3, title: 'ADLİ TIP OTOPSİSİ', label: 'TOKSİKOLOJİ',
+                content: `<div class="stamp-red">ÖNEMLİ</div><h1 class="text-3xl mb-6 border-b border-stone-800 pb-2">Ölüm Sebebi</h1><div class="space-y-4 text-lg leading-relaxed"><p><strong>Bulgu:</strong> Kanda yüksek dozda <em>Aconitum Napellus</em> (Kurtboğan) tespit edildi.</p><p><strong>Giriş Yolu:</strong> Sindirim temiz. Zehir <strong>deri yoluyla</strong> (temas) alınmış.</p><p><strong>Kritik:</strong> Sadece sağ el parmak uçlarında zehir kalıntısı var.</p></div>`,
+                x: 400, y: 150, rot: 3
+            },
+            doc7: {
+                id: 'doc7', chapter: 3, title: 'KRİMİNAL LAB RAPORU', label: 'YÜZEYLER',
+                content: `<h1 class="text-3xl mb-6 border-b border-stone-800 pb-2">Analiz Sonuçları</h1><ul class="list-disc pl-5 space-y-2 text-lg"><li><strong>Şarap Kadehleri:</strong> Temiz.</li><li><strong>Eldivenler:</strong> Dış yüzey şaraplı, iç yüzey temiz. Zehir yok.</li><li><strong>Kızıl Ejder Heykeli:</strong> Heykelin yüzeyine yağlı bir zehir sürülmüş. Dokunan kişi zehirlenir.</li></ul>`,
+                x: 150, y: 600, rot: 6
+            },
+            doc5: {
+                id: 'doc5', chapter: 4, title: 'ŞÜPHELİ: YASEMİN VURAL', label: 'SANAT TÜCCARI',
+                content: `<h1 class="text-3xl mb-6 border-b border-stone-800 pb-2">İfade: Yasemin</h1><p>"Heykeli ben teslim ettim. Vedat bey sanat eserlerini 'hissetmeyi' severdi. Ona dokunmasını ben tavsiye ettim."</p><p><strong>Güvenlik Kamerası (Giriş):</strong> Yasemin hanım partiye gelirken kalın deri eldivenler takıyormuş. İçerisi sıcak olmasına rağmen hiç çıkarmamış.</p>`,
+                x: 500, y: 350, rot: -4
+            },
+            doc12: {
+                id: 'doc12', chapter: 4, title: 'GİZLİ BANKA KAYITLARI', label: 'FİNANS',
+                content: `<h1 class="text-3xl mb-6 border-b border-stone-800 pb-2">Şüpheli Transferler</h1><table class="w-full text-left text-sm font-mono border-collapse"><tr class="border-b border-stone-600"><th class="py-2">ALICI</th><th>MİKTAR</th><th>AÇIKLAMA</th></tr><tr class="border-b border-stone-800"><td class="py-2">Yasemin Vural</td><td>$500,000</td><td>Sanat Eseri Avansı</td></tr><tr><td class="py-2">Yasemin Vural</td><td>$250,000</td><td>Danışmanlık</td></tr></table><p class="mt-4"><strong>NOT:</strong> Bu paralar 'Kızıl Ejder' heykeli için ödenmiş ancak heykelin piyasa değeri en fazla $50,000.</p>`,
+                x: 550, y: 400, rot: -8
+            },
+            doc6: {
+                id: 'doc6', chapter: 5, title: 'ŞÜPHELİ: SELİM (KAHYA)', label: 'PERSONEL',
+                content: `<div class="stamp-blue">GÖZALTI</div><h1 class="text-3xl mb-6 border-b border-stone-800 pb-2">Sorgu: Selim</h1><p>"Kovulmuştum. Sadece gümüş şamdanları çalmak için kameraları kapattım. Adamı öldürmedim abi!"</p><p><strong>Not:</strong> Olay saati kameralar kapalıydı. Selim'in üzerinden çalıntı şamdanlar çıktı.</p>`,
+                x: 800, y: 400, rot: 2
+            },
+            doc8: {
+                id: 'doc8', chapter: 5, title: 'HİZMETÇİ AYŞE\'NİN İFADESİ', label: 'TANIK',
+                content: `<h1 class="text-3xl mb-6 border-b border-stone-800 pb-2">Kritik Tanık</h1><p class="text-lg">"Kerem bey şarabı dökünce Vedat bey eldivenlerini çıkardı. O an Yasemin Hanım hemen yanına gitti, 'Heykeli bir inceleyin siniriniz geçer' dedi. Vedat bey de çıplak elle heykeli aldı."</p>`,
+                x: 450, y: 550, rot: -3
+            },
+            doc9: {
+                id: 'doc9', chapter: 5, title: 'BAHÇIVANIN NOTU', label: 'EK BİLGİ',
+                content: `<div class="stamp-red">DİKKAT</div><p class="text-lg">"Leyla hanımın verdiği o tohumlar hala serada kilitli duruyor. Paketi açılmamış bile. Anahtar bende."</p><p class="text-sm mt-4 font-bold">SONUÇ: Leyla'nın bitkileri henüz kullanılmamış.</p>`,
+                x: 750, y: 600, rot: 1
+            },
+            
+            // --- YENİ BÖLÜMLER (EXTENDED CUT) ---
+            
+            doc13: {
+                id: 'doc13', chapter: 6, title: 'YASEMİN\'İN ÇANTASI', label: 'GİZLİ BÖLME',
+                content: `<h1 class="text-2xl mb-4 border-b pb-2">Ele Geçirilen Not</h1><p class="italic">"Heykel sadece bir araç. Asıl hedef 'Kasa 1999'. Eğer Vedat ölmezse, geçmişteki o geceyi herkese anlatırım. Seçim senin Yasemin."</p><p class="mt-4 text-red-700 font-bold">İmza Yok. Sadece siyah bir mühür var.</p>`,
+                x: 100, y: 200, rot: -10
+            },
+            doc14: {
+                id: 'doc14', chapter: 6, title: 'ESKİ GAZETE KÜPÜRÜ (1999)', label: 'ARŞİV',
+                content: `<h2 class="text-xl font-bold mb-2">KORHAN AİLESİNDE TRAJEDİ</h2><p class="font-mono text-xs">25.04.1999 - Vedat Korhan'ın babası Hikmet Korhan, şüpheli bir yangında hayatını kaybetti. Olay yerinde bulunan tek kişi, o sırada henüz stajyer olan şimdiki aile avukatı <strong>Cemil Soykan</strong>'dı.</p>`,
+                x: 400, y: 300, rot: 5
+            },
+            doc15: {
+                id: 'doc15', chapter: 7, title: 'ŞÜPHELİ: DR. NİHAT', label: 'AİLE HEKİMİ',
+                content: `<h1 class="text-3xl mb-4">Doktor Nihat</h1><p>"Vedat beyin kalp rahatsızlığı vardı. Verdiğim ilaçlar standarttı."</p><div class="bg-yellow-900/20 p-4 border border-yellow-800 mt-2"><p><strong>Çelişki:</strong> Vedat'ın kanında bulunan Aconitum zehrinin panzehiri, Dr. Nihat'ın çantasında bulundu. Neden yanında taşıyordu?</p></div>`,
+                x: 600, y: 150, rot: -5
+            },
+            doc16: {
+                id: 'doc16', chapter: 7, title: 'REÇETE DÖKÜMÜ', label: 'ECZANE',
+                content: `<p class="font-mono">Dr. Nihat, son 6 ayda yüklü miktarda "Digitalis" ve "Arsenik" bazlı bileşen sipariş etmiş. Bu maddeler Vedat'ın vücudunda yoktu.</p><p class="mt-2 font-bold">Soru: Bu zehirler kimin için hazırlandı?</p>`,
+                x: 200, y: 500, rot: 8
+            },
+            doc17: {
+                id: 'doc17', chapter: 8, title: 'ŞÜPHELİ: AVUKAT CEMİL', label: 'HUKUK',
+                content: `<div class="stamp-blue">TAKİP</div><h1 class="text-3xl mb-4">Avukat Cemil Soykan</h1><p>"Vasiyet henüz açılmadı. Vedat bey her şeyi bir hayır kurumuna bıraktığını söylemişti."</p><p class="mt-4 text-red-600"><strong>YALAN TESPİTİ:</strong> Noterdeki asıl vasiyette, tüm mirasın "Gölge" lakaplı kimliği belirsiz birine bırakıldığı yazıyor.</p>`,
+                x: 500, y: 400, rot: -2
+            },
+            doc18: {
+                id: 'doc18', chapter: 8, title: 'ŞİFRELİ E-POSTA', label: 'DİJİTAL',
+                content: `<p class="font-mono text-xs bg-black text-green-500 p-4">KİMDEN: shadow_council@xmail.com<br>KİME: c.soykan@law.com<br><br>"Emanet teslim alındı mı? Heykel işi Yasemin'in başını yakacak, plan tıkırında. Vedat'ın 1999 dosyasını yok et."</p>`,
+                x: 300, y: 600, rot: 0
+            },
+            doc19: {
+                id: 'doc19', chapter: 9, title: 'GİZLİ ODA KROKİSİ', label: 'MİMARİ',
+                content: `<div class="stamp-red">GİZLİ</div><p>Yalının bodrum katında, resmi projede görünmeyen bir oda tespit edildi. Odanın girişi sadece <strong>Kızıl Ejder</strong> heykeli doğru açıyla yerleştirildiğinde açılıyor.</p>`,
+                x: 150, y: 350, rot: 15
+            },
+            doc20: {
+                id: 'doc20', chapter: 9, title: 'ODADAN ÇIKAN GÜNLÜK', label: 'İTİRAF',
+                content: `<p class="font-handwriting text-lg italic">"Babamı ben öldürmedim. Cemil yaptı. Beni yıllarca bununla tehdit etti. Servetimi sömürdü. Şimdi de beni öldürüp her şeyi 'Gölge' dediği o örgüte aktaracak. Zehirlendiğimi biliyorum... İlaçlarımı Nihat değiştirdi..." - Vedat Korhan</p>`,
+                x: 450, y: 200, rot: -3
+            },
+            doc21: {
+                id: 'doc21', chapter: 10, title: 'SON PARÇA: SES KAYDI', label: 'KANIT',
+                content: `<p class="font-bold border-b border-white/20 mb-2">TELESEKRETER KAYDI (OLAY GÜNÜ 18:00)</p><p>"Alo Vedat? Ben Cemil. Nihat ile konuştum. İlaçların dozunu ayarladı. Bu gece her şey bitecek. Yasemin heykeli getirecek, o aptal Kerem de ortalığı karıştıracak. Sen sadece 'krizi' bekle. Rahat uyu kardeşim."</p>`,
+                x: 300, y: 300, rot: 0
+            }
         };
 
-        function playSnd(name) {
-            audio[name].currentTime = 0;
-            audio[name].play().catch(() => {});
-        }
+        const chapterQuizzes = {
+            1: { title: "BÖLÜM 1: ÖN İNCELEME", desc: "Maktulün ölüm şekli hakkında ilk izlenimin nedir?", options: [ { txt: "Silahlı saldırı.", correct: false }, { txt: "Zehirlenme şüphesi var (Köpürme/Kasılma).", correct: true }, { txt: "Kafasına darbe almış.", correct: false }, { txt: "Kalp krizi (Doğal ölüm).", correct: false } ] },
+            2: { title: "BÖLÜM 2: ŞÜPHELİLER", desc: "Kerem Soylu'nun cinayeti işlemesi için en güçlü motivasyonu nedir?", options: [ { txt: "Maktulün karısına aşık olması.", correct: false }, { txt: "Maktule olan yüklü borcu ve tehdit notu.", correct: true }, { txt: "Sanat eserlerini çalmak istemesi.", correct: false }, { txt: "Maktulün onu kovması.", correct: false } ] },
+            3: { title: "BÖLÜM 3: ADLİ TIP", desc: "Otopsi raporuna göre zehir vücuda nasıl girmiş?", options: [ { txt: "Şarap kadehine zehir atılarak.", correct: false }, { txt: "Eldivenlerin içine iğne konularak.", correct: false }, { txt: "Zehirli bir yüzeye çıplak elle temas ederek.", correct: true }, { txt: "Yemeğine katılarak.", correct: false } ] },
+            4: { title: "BÖLÜM 4: PARA TRAFİĞİ", desc: "Banka kayıtlarında Yasemin Vural ile ilgili şüpheli olan nedir?", options: [ { txt: "Yasemin maktule para göndermiş.", correct: false }, { txt: "Maktul, değersiz bir heykel için Yasemin'e servet ödemiş.", correct: true }, { txt: "Yasemin iflas etmiş.", correct: false }, { txt: "Kayıtlarda Yasemin'in adı hiç geçmiyor.", correct: false } ] },
+            5: { title: "BÖLÜM 5: ARA DEĞERLENDİRME", desc: "Maktulün o heykeli çıplak elle tutmasını kim, nasıl sağladı?", options: [ { txt: "Leyla zorla tutuşturdu.", correct: false }, { txt: "Kerem şarabı döküp eldiveni çıkarttırdı, Yasemin heykeli verdi.", correct: true }, { txt: "Selim eldivenleri çaldı.", correct: false }, { txt: "Maktul eldiven takmayı sevmezdi.", correct: false } ] },
+            // NEW QUIZZES
+            6: { title: "BÖLÜM 6: DERİN BAĞLANTILAR", desc: "Yasemin'in çantasından çıkan not neye işaret ediyor?", options: [ { txt: "Yasemin'in kendi isteğiyle cinayeti işlediğine.", correct: false }, { txt: "Yasemin'in birileri tarafından tehdit edildiğine.", correct: true }, { txt: "Yasemin'in aslında polis olduğuna.", correct: false }, { txt: "Notun bir aşk mektubu olduğuna.", correct: false } ] },
+            7: { title: "BÖLÜM 7: DOKTORUN SIRRI", desc: "Doktor Nihat'ın çantasındaki panzehir ne anlama geliyor?", options: [ { txt: "Vedat'ı kurtarmaya çalıştı.", correct: false }, { txt: "Zehri onun hazırladığını ve ne olduğunu bildiğini gösterir.", correct: true }, { txt: "Kendisi için taşıyordu.", correct: false }, { txt: "Tesadüfen oradaydı.", correct: false } ] },
+            8: { title: "BÖLÜM 8: GEÇMİŞİN GÖLGESİ", desc: "Avukat Cemil'in asıl amacı ne?", options: [ { txt: "Vedat'ı savunmak.", correct: false }, { txt: "Mirası 'Gölge' denilen örgüte aktarmak.", correct: true }, { txt: "Leyla ile evlenmek.", correct: false }, { txt: "Kerem'in borcunu ödemek.", correct: false } ] },
+            9: { title: "BÖLÜM 9: VEDAT'IN GÜNLÜĞÜ", desc: "Vedat Korhan aslında kimi suçluyor?", options: [ { txt: "Karısı Leyla'yı.", correct: false }, { txt: "Ortağı Kerem'i.", correct: false }, { txt: "Avukat Cemil ve Doktor Nihat'ı.", correct: true }, { txt: "Hizmetçiyi.", correct: false } ] }
+        };
+
+        const interrogationDB = {
+            "Leyla Korhan": { requiredLevel: 2, good: "Bak polis bey, kocamla aram iyi değildi ama ben katil değilim. Sadece mirasımı alıp gitmek istedim. O tohumları da stresten kurtulmak için aldım. Yemin ederim ekmedim bile!", bad: "Bağırma bana! Avukatımı arayacağım! Evet, tohumları aldım ama bahçıvana sor, hepsi kilitli dolapta duruyor. Zehir falan yapmadım ben. Kocamı o lanet heykelleri öldürdü!" },
+            "Kerem Soylu": { requiredLevel: 2, good: "Abi bak, çok borcum vardı yalan yok. Vedat'la tartıştık ama ben sadece itişip kakıştım. Şarabı dökünce delirdi. Ben de korkup lavaboya kaçtım. Öldürmedim onu...", bad: "Tamam o not benim! Onu tehdit ettim çünkü beni bitirecekti. Ama yemin ederim öldürmedim. Şarabı döktüm, o kadar. Sonra o kadın geldi yanına." },
+            "Yasemin Vural": { requiredLevel: 4, good: "Memur bey, sanat narin bir iştir. Vedat bey eserlerin ruhunu hissetmeyi severdi. O para mı? Sanat paha biçilemezdir, Vedat bey cömert bir adamdı.", bad: "Sesini yükseltme küçük adam. Ben uluslararası bir sanat tüccarıyım. Sahte eser mi? Hah! Benim sattığım her şey gerçektir. Vedat kendi eceliyle öldü, benimle uğraşmayı bırak." },
+            "Selim (Kahya)": { requiredLevel: 5, good: "Abi kovulmuştum, parasızdım. Sadece gümüş şamdanları alıp kaçacaktım. Kameraları o yüzden kapattım. Vedat beyi yerde yatarken gördüm ama korkup kaçtım.", bad: "Yapmadım diyorum! Hırsızım ben, katil değil! Kameraları kapattım evet ama adamı öldürmedim. Ben şamdanları çantaya atarken o kadın, Leyla hanım mutfakta eldiven yıkıyordu." },
+            "Dr. Nihat": { requiredLevel: 6, good: "Ben sadece doktorum memur bey. Reçeteler hastamın ihtiyacına göredir. Panzehir mi? Her ihtimale karşı taşırım, Vedat bey riskli bir hayat yaşıyordu.", bad: "Beni reçetelerle korkutamazsın! Vedat benim hastamdı ama aynı zamanda... Neyse. O gece oradaydım çünkü beni aradı. Kendini iyi hissetmiyordu. Yetişemedim." },
+            "Avukat Cemil": { requiredLevel: 8, good: "Hukuk büromuzun kayıtları gizlidir. Müvekkilim Vedat Bey trajik bir şekilde öldü. Vasiyet işleri prosedüre uygundur. Başka sorunuz?", bad: "Dikkatli konuş memur efendi. 1999 dosyası kapandı. O yangın bir kazaydı. Vedat da babası gibi dikkatsizdi. 'Gölge' mi? Öyle birini tanımıyorum. Bu bir hayal ürünü." }
+        };
+
+        let currentSuspectID = null;
+        let interrogationTimer = null; 
 
         function startGame() {
-            playSnd('click');
+            playClickSound();
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('gameHeader').classList.remove('hidden');
-            document.getElementById('desk').classList.add('opacity-100');
-            document.getElementById('desk').style.opacity = "1";
-            initDesk();
+            document.getElementById('desk').classList.remove('opacity-0');
+            document.getElementById('quitBtn').classList.remove('hidden');
+            document.getElementById('currentDate').innerText = new Date().toLocaleDateString('tr-TR');
+            loadLevel(1);
         }
 
-        function initDesk() {
+        function loadLevel(level) {
+            currentLevel = level;
+            const titles = [
+                "", "OLAY YERİ", "ŞÜPHELİ AİLE", "ADLİ TIP", "GİZLİ KASA", "SON PARÇALAR",
+                "DERİN BAĞLANTILAR", "DOKTORUN SIRRI", "GEÇMİŞİN GÖLGESİ", "VEDAT'IN GÜNLÜĞÜ", "BÜYÜK FİNAL"
+            ];
+            document.getElementById('headerPhaseInfo').innerText = `BÖLÜM ${level}: ${titles[level] || 'FİNAL'}`;
+            const n = document.getElementById('levelNotify');
+            const t = document.getElementById('lvlTitle');
+            const d = document.getElementById('lvlDesc');
+            
+            if (level > 10) {
+                 t.innerText = "FİNAL DOSYASI";
+                 d.innerText = "Operasyon Emri Bekleniyor...";
+            } else {
+                 t.innerText = `BÖLÜM ${level}`;
+                 d.innerText = "Masaya yeni dosyalar düştü dedektif...";
+            }
+            
+            n.style.display = 'block';
+            if(level <= 10) spawnChapterDocs(level);
+        }
+
+        function closeLevelNotify() { playClickSound(); document.getElementById('levelNotify').style.display = 'none'; }
+
+        function playTossSound(index) {
+            setTimeout(() => {
+                const s = audioPool.toss[index % audioPool.toss.length];
+                s.currentTime = 0; s.play().catch(()=>{});
+            }, (index * 120) + 300); 
+        }
+
+        function spawnChapterDocs(level) {
             const desk = document.getElementById('desk');
-            Object.values(documents).forEach((doc, index) => {
+            const newDocs = Object.keys(documents).filter(key => documents[key].chapter === level);
+            newDocs.forEach((key, index) => {
+                const doc = documents[key];
+                if(document.getElementById(`doc-${doc.id}`)) return;
                 const div = document.createElement('div');
-                div.className = 'document';
+                div.className = `document tossed`;
                 div.id = `doc-${doc.id}`;
-                div.style.left = (window.innerWidth / 2 - 75) + 'px';
-                div.style.top = (window.innerHeight + 100) + 'px';
-                
-                div.innerHTML = `
-                    <div class="folder-label">${doc.label}</div>
-                    <div class="document-title">${doc.title}</div>
-                    <div class="inspected-mark" id="mark-${doc.id}">${doc.inspected ? '✓' : ''}</div>
-                `;
-
+                const randomScatterX = (Math.random() * 40) - 20;
+                const randomScatterY = (Math.random() * 40) - 20;
+                div.style.left = (doc.x + randomScatterX) + 'px';
+                div.style.top = (doc.y + randomScatterY) + 'px';
+                const randomStartX = (Math.random() * 1000) - 500; 
+                const randomStartY = 1200 + (Math.random() * 300); 
+                const randomStartRot = (Math.random() * 360) - 180;
+                const midRot = (doc.rot + randomStartRot) / 3;
+                div.style.setProperty('--startX', `${randomStartX}px`);
+                div.style.setProperty('--startY', `${randomStartY}px`);
+                div.style.setProperty('--startRot', `${randomStartRot}deg`);
+                div.style.setProperty('--midRot', `${midRot}deg`);
+                div.style.setProperty('--endRot', `${doc.rot}deg`);
+                div.style.animationDelay = `${index * 0.1}s`;
+                playTossSound(index);
+                div.innerHTML = `<div class="folder-label">${doc.label}</div><div class="document-title">${doc.title}</div><div class="inspected-mark" id="mark-${doc.id}">${doc.inspected ? '✓' : ''}</div>`;
+                div.ondblclick = () => openDoc(doc.id);
+                makeDraggable(div);
                 desk.appendChild(div);
-
-                setTimeout(() => {
-                    div.style.transition = "all 0.6s cubic-bezier(0.17, 0.67, 0.46, 1.2)";
-                    div.style.opacity = "1";
-                    div.style.left = doc.x + 'px';
-                    div.style.top = doc.y + 'px';
-                    div.style.transform = `rotate(${doc.rot}deg)`;
-                    playSnd('toss');
-                }, index * 200);
-
-                setupPointerEvents(div, doc);
             });
         }
 
-        function setupPointerEvents(el, doc) {
-            let isDragging = false;
-            let startPointerX, startPointerY;
-            let startElementX, startElementY;
-            let moveCount = 0;
+        function makeDraggable(el) {
+            let p1=0, p2=0, p3=0, p4=0;
+            let touchStartTime = 0;
+            let touchMoved = false;
+            let touchStartX = 0, touchStartY = 0;
 
-            el.onpointerdown = (e) => {
-                el.setPointerCapture(e.pointerId);
-                isDragging = true; moveCount = 0;
+            const dragStart = (e) => {
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                const currentRot = getComputedStyle(el).getPropertyValue('--endRot');
+                el.classList.remove('tossed');
+                el.style.transform = `rotate(${currentRot})`;
+                el.style.opacity = '1';
+                p3 = clientX; p4 = clientY;
+                touchStartX = clientX; touchStartY = clientY;
+                touchStartTime = Date.now();
+                touchMoved = false;
+                document.onmouseup = dragEnd; document.ontouchend = dragEnd;
+                document.onmousemove = dragMove; document.ontouchmove = dragMove;
                 document.querySelectorAll('.document').forEach(d => d.style.zIndex = "10");
-                el.style.zIndex = "100";
-                startPointerX = e.clientX; startPointerY = e.clientY;
-                startElementX = el.offsetLeft; startElementY = el.offsetTop;
-                el.style.transition = "none";
+                el.style.zIndex = "50";
             };
-
-            el.onpointermove = (e) => {
-                if (!isDragging) return;
-                const dx = e.clientX - startPointerX;
-                const dy = e.clientY - startPointerY;
-                if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-                    moveCount++;
-                    el.style.left = (startElementX + dx) + 'px';
-                    el.style.top = (startElementY + dy) + 'px';
+            const dragMove = (e) => {
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                const dx = Math.abs(clientX - touchStartX);
+                const dy = Math.abs(clientY - touchStartY);
+                if (dx > 5 || dy > 5) touchMoved = true;
+                p1 = p3 - clientX; p2 = p4 - clientY; p3 = clientX; p4 = clientY;
+                el.style.top = (el.offsetTop - p2) + "px"; el.style.left = (el.offsetLeft - p1) + "px";
+            };
+            const dragEnd = (e) => {
+                document.onmouseup = null; document.onmousemove = null;
+                document.ontouchend = null; document.ontouchmove = null;
+                // Mobilde sürüklenmemişse tek dokunuş = aç
+                const elapsed = Date.now() - touchStartTime;
+                if (e.type === 'touchend' && !touchMoved && elapsed < 400) {
+                    const docId = el.id.replace('doc-', '');
+                    openDoc(docId);
                 }
             };
-
-            el.onpointerup = () => {
-                isDragging = false;
-                if (moveCount < 5) openDoc(doc.id);
-            };
+            el.onmousedown = dragStart; el.ontouchstart = dragStart;
         }
 
         function openDoc(id) {
-            playSnd('open');
-            documents[id].inspected = true;
-            document.getElementById(`mark-${id}`).innerText = '✓';
-            document.getElementById('modalContent').innerHTML = documents[id].content;
+            audioPool.open.currentTime = 0; audioPool.open.play().catch(()=>{});
+            const doc = documents[id]; doc.inspected = true;
+            const mark = document.getElementById(`mark-${id}`); if(mark) mark.innerText = '✓';
+            document.getElementById('modalContent').innerHTML = doc.content;
             document.getElementById('docModal').classList.remove('hidden');
-            checkProgress();
+            checkStatus();
         }
 
-        function checkProgress() {
-            if (Object.values(documents).every(d => d.inspected)) {
-                const btn = document.getElementById('finalBtn');
-                btn.classList.replace('bg-stone-950', 'bg-stone-200');
-                btn.classList.replace('text-stone-700', 'text-black');
-                btn.classList.add('font-bold');
+        function checkStatus() {
+            const visibleDocs = Object.values(documents).filter(d => d.chapter <= currentLevel);
+            const allInspected = visibleDocs.every(d => d.inspected);
+            const b = document.getElementById('finalBtn');
+            if(allInspected) {
+                b.classList.remove('bg-stone-900', 'text-stone-800', 'cursor-not-allowed', 'border-stone-800');
+                b.classList.add('bg-stone-200', 'text-black', 'cursor-pointer', 'border-white', 'animate-pulse');
+                if (currentLevel <= 9) b.innerText = `Bölümü Bitir (${currentLevel}/10)`;
+                else b.innerText = "HÜKMÜ VER";
             }
         }
+
+        function updateVolume(val) { currentGlobalVolume = val / 100; document.getElementById('volVal').innerText = val + "%"; applyAudioVolumes(); }
+        function toggleSettings() { playClickSound(); document.getElementById('settingsPanel').classList.toggle('hidden'); }
+        function toggleFullscreen() { playClickSound(); if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen().catch(()=>{}); }
+        function showHowToPlay() { playClickSound(); document.getElementById('howToPlayContent').classList.toggle('hidden'); }
+        function toggleInterrogation() { playClickSound(); const modal = document.getElementById('interrogationModal'); if(modal.classList.contains('hidden')) { modal.classList.remove('hidden'); initInterrogationList(); } else { modal.classList.add('hidden'); resetInterrogation(); } }
+
+        function initInterrogationList() {
+            const list = document.getElementById('int-select-screen');
+            list.innerHTML = Object.keys(interrogationDB).map(name => {
+                const suspect = interrogationDB[name];
+                const isUnlocked = currentLevel >= suspect.requiredLevel;
+                return isUnlocked ? `<button onclick="startInterrogation('${name}')" class="p-4 border border-stone-600 bg-stone-900/50 hover:bg-stone-800 hover:border-stone-400 text-stone-300 text-sm uppercase tracking-widest transition-all text-left">> ${name}</button>` : `<button disabled class="p-4 border border-stone-800 bg-black/50 text-stone-700 text-sm uppercase tracking-widest text-left cursor-not-allowed">[KİLİTLİ] DOSYA BEKLENİYOR</button>`;
+            }).join('');
+            document.getElementById('int-select-screen').classList.remove('hidden');
+            document.getElementById('int-interaction-screen').classList.add('hidden');
+        }
+
+        function startInterrogation(name) { playClickSound(); currentSuspectID = name; document.getElementById('int-select-screen').classList.add('hidden'); document.getElementById('int-interaction-screen').classList.remove('hidden'); document.getElementById('int-name').innerText = name; document.getElementById('int-text').innerText = "... (Sorgu bekleniyor)"; document.getElementById('int-avatar').innerText = name.charAt(0); }
+
+        function conductInterrogation(type) {
+            playClickSound(); const textEl = document.getElementById('int-text'); const response = interrogationDB[currentSuspectID][type];
+            if (interrogationTimer) { clearTimeout(interrogationTimer); interrogationTimer = null; }
+            textEl.innerHTML = ""; let i = 0; const speed = 20;
+            function typeWriterInt() { if (i < response.length) { textEl.innerHTML += response.charAt(i); i++; interrogationTimer = setTimeout(typeWriterInt, speed); } else interrogationTimer = null; }
+            typeWriterInt();
+        }
+
+        function resetInterrogation() { if (interrogationTimer) { clearTimeout(interrogationTimer); interrogationTimer = null; } initInterrogationList(); }
+        function toggleCredits() { playClickSound(); document.getElementById('creditsModal').classList.toggle('hidden'); }
+        function quitToMenu() { playClickSound(); location.reload(); }
 
         function attemptFinalize() {
-            if (!Object.values(documents).every(d => d.inspected)) {
-                const box = document.getElementById('msgBox');
-                box.style.display = 'block';
-                setTimeout(() => box.style.display = 'none', 3000);
+            playClickSound();
+            const visibleDocs = Object.values(documents).filter(d => d.chapter <= currentLevel);
+            const allInspected = visibleDocs.every(d => d.inspected);
+            if(!allInspected) {
+                audioPool.error.currentTime = 0; audioPool.error.play().catch(()=>{});
+                const m = document.getElementById('msgBox'); m.style.display = 'block'; setTimeout(() => m.style.display = 'none', 3000);
                 return;
             }
-            const list = document.getElementById('suspectList');
-            list.innerHTML = ['ZEYNEP A.', 'CEMİL YAKUT', 'KAZA / DOĞAL ÖLÜM'].map(name => 
-                `<button onclick="finalizeGame('${name}')" class="w-full py-4 border border-white/10 text-stone-300 text-[10px] uppercase font-bold active:bg-white active:text-black transition-colors">${name}</button>`
-            ).join('');
-            document.getElementById('finalModal').classList.remove('hidden');
+            if (currentLevel <= 9) showChapterQuiz(currentLevel);
+            else showFinalAccusation();
         }
 
-        function finalizeGame(decision) {
-            playSnd('click');
-            const screen = document.getElementById('endingScreen');
-            const body = document.getElementById('endingBody');
-            const stamp = document.getElementById('endingStamp');
+        function showChapterQuiz(level) {
+            const modal = document.getElementById('choiceModal'); const list = document.getElementById('choiceList'); const title = document.getElementById('choiceTitle'); const desc = document.getElementById('choiceDesc');
+            const quiz = chapterQuizzes[level]; title.innerText = quiz.title; desc.innerText = quiz.desc;
+            list.innerHTML = quiz.options.map((opt, idx) => `<button onclick="checkAnswer(${level}, ${opt.correct})" class="w-full p-4 border border-white/10 bg-white/5 hover:border-stone-400 hover:bg-stone-800 transition-all text-left group"><span class="text-stone-300 text-xs uppercase tracking-widest group-hover:text-white">${opt.txt}</span></button>`).join('');
+            modal.classList.remove('hidden');
+        }
+
+        function checkAnswer(level, isCorrect) {
+            playClickSound();
+            if (isCorrect) { hideChoiceModal(); loadLevel(level + 1); }
+            else { audioPool.error.currentTime = 0; audioPool.error.play().catch(()=>{}); const desc = document.getElementById('choiceDesc'); desc.innerHTML = "<span class='text-red-600 font-bold'>YANLIŞ ÇIKARIM. DOSYALARI TEKRAR OKU.</span>"; setTimeout(() => { desc.innerText = chapterQuizzes[level].desc; }, 2000); }
+        }
+
+        function showFinalAccusation() {
+            const l = document.getElementById('choiceList'); const title = document.getElementById('choiceTitle'); const desc = document.getElementById('choiceDesc');
+            title.innerText = "SON KARAR TUTANAĞI"; desc.innerText = "Yanlış karar tüm çabayı boşa çıkarır. Büyük resmi gör.";
             
-            document.getElementById('finalModal').classList.add('hidden');
-            screen.style.display = 'flex';
-
-            let reportText = "";
-            if (decision === 'ZEYNEP A.') {
-                stamp.innerText = "ADALET YERİNİ BULDU";
-                stamp.style.color = "#166534";
-                stamp.style.borderColor = "#166534";
-                reportText = "Tebrikler dedektif. Zeynep A.'nın itiraf ettiği pembe haplar, otopsi raporundaki aşırı doz bulgusuyla birebir örtüşüyor. Maktulün elindeki kol düğmesi ise şaşırtmacadan ibaretti. Katil parmaklıklar ardında.";
-            } else if (decision === 'CEMİL YAKUT') {
-                stamp.innerText = "MASUM HAPİSTE";
-                stamp.style.color = "#991b1b";
-                stamp.style.borderColor = "#991b1b";
-                reportText = "Hatalı karar. Cemil Yakut maktulün eski bir dostuydu ve o kol düğmesi yıllar önce hediye edilmişti. Gerçek katil Zeynep A. hala serbest. Adalet bu kez tecelli etmedi.";
-            } else {
-                stamp.innerText = "FAİLİ MEÇHUL";
-                stamp.style.color = "#444";
-                stamp.style.borderColor = "#444";
-                reportText = "Dosyayı kapattınız ancak Selim Aksoy'un kanındaki ölümcül dozdaki ilacı açıklayamadınız. Bu bir cinayetti ve faili elinizden kaçırdınız. Arşivde bir dosya daha tozlanmaya devam edecek.";
-            }
-
-            // Simple Typewriter Effect
-            let i = 0;
-            body.innerText = "";
-            function type() {
-                if (i < reportText.length) {
-                    body.innerText += reportText.charAt(i);
-                    i++;
-                    setTimeout(type, 30);
-                }
-            }
-            setTimeout(type, 500);
+            const s = [
+                {n: "LEYLA & KEREM", d: "Aşk Cinayeti"}, 
+                {n: "YASEMİN VURAL", d: "Tek Başına"}, 
+                {n: "DR. NİHAT", d: "Tıbbi Hata / İhmal"},
+                {n: "AVUKAT CEMİL & DR. NİHAT", d: "Örgütlü Suç"},
+                {n: "SELİM (KAHYA)", d: "Hırsızlık Süsü Verilmiş Cinayet"}
+            ];
+            
+            l.innerHTML = s.map(x => `<button onclick="solve('${x.n}')" class="w-full p-5 border border-white/5 bg-white/5 hover:border-red-900 hover:bg-red-900/20 text-left transition-all group"><div class="text-stone-300 text-sm uppercase tracking-[0.2em] font-bold group-hover:text-white">${x.n}</div><div class="text-[9px] text-stone-500 uppercase mt-1 tracking-widest group-hover:text-stone-300">${x.d}</div></button>`).join('');
+            document.getElementById('choiceModal').classList.remove('hidden');
         }
 
-        function closeModal() { document.getElementById('docModal').classList.add('hidden'); }
-        function hideFinalize() { document.getElementById('finalModal').classList.add('hidden'); }
+        function hideChoiceModal() { playClickSound(); document.getElementById('choiceModal').classList.add('hidden'); }
+
+        async function typeWriter(text, elementId) {
+            const element = document.getElementById(elementId); const cursor = document.getElementById('telegraphCursor');
+            element.innerHTML = ""; cursor.classList.remove('hidden'); audioPool.typeLoop.currentTime = 0; audioPool.typeLoop.play().catch(()=>{});
+            for (let i = 0; i < text.length; i++) { element.innerHTML += text.charAt(i); await new Promise(resolve => setTimeout(resolve, 30 + Math.random() * 40)); }
+            audioPool.typeLoop.pause(); audioPool.typeLoop.currentTime = 0; cursor.classList.add('hidden');
+        }
+
+        async function solve(name) {
+            playClickSound(); const scr = document.getElementById('gameOverScreen'); document.getElementById('choiceModal').classList.add('hidden'); scr.classList.remove('hidden');
+            let finalMessage = (name === "AVUKAT CEMİL & DR. NİHAT") ? 
+                "Yürütülen titiz ve kapsamlı soruşturma neticesinde, birincil şüpheli Avukat Cemil Soykan yurt dışına firar teşebbüsü esnasında kolluk kuvvetlerince derdest edilmiştir. Gözaltına alınan Dr. Nihat; maktul Vedat Korhan’ın ilaçlarını sistematik bir biçimde değiştirdiğini ve süreci şüpheli Cemil Soykan’ın talimatları doğrultusunda yönettiğini itiraf etmiştir. Operasyon dahilinde 'Gölge' yapılanması tamamen tasfiye edilmiş, söz konusu suç örgütüyle bağlantılı 1999 tarihli Hikmet Korhan dosyası yeniden incelemeye alınmıştır. Adli süreç tamamlanmış olup adalet tesis edilmiştir." : 
+                "Söz konusu soruşturma, delil toplama ve derinleştirme safhalarında yüzeysel kalmış; tahkikat yalnızca Yasemin Vural ve Kerem Soylu gibi alt düzey iştirakçilerle sınırlı tutulmuştur. Suç organizasyonunun asıl yönetici kadrosunun firarına engel olunamamış, Vedat Korhan’a ait mirasın 'Gölge' yapılanmasına aktarımı önlenememiştir. Somut delil yetersizliği ve asıl faillere ulaşılamaması nedeniyle ilgili dosya, 'faili meçhul' statüsünde arşive kaldırılmıştır.";
+            
+            await typeWriter(finalMessage, 'endText');
+            const stampEl = document.getElementById('finalStamp'); stampEl.classList.remove('stamp-animate'); 
+            stampEl.innerHTML = `<img src="https://i.ibb.co/tTBb54y4/Emniuyet-Genel-M-d-rl.png" alt="Emniyet Damgası" />`;
+            setTimeout(() => {
+                audioPool.stamp.currentTime = 0; audioPool.stamp.playbackRate = 0.6; audioPool.stamp.play().catch(()=>{});
+                stampEl.classList.add('stamp-animate'); document.body.classList.add('shake-screen');
+                setTimeout(() => document.body.classList.remove('shake-screen'), 500);
+                setTimeout(() => { document.getElementById('restartContainer').classList.remove('hidden'); }, 1000);
+            }, 100);
+        }
+
+        const creditsData = `COLD FILES
+A game by Destroy Games
+
+Developer & Scenario
+Destroy Games
+
+Publisher
+Destroy Studios
+
+Music & Sound
+Destroy Music
+
+Credits Theme
+Borikz
+
+Game Direction
+Oyunun yaratıcı vizyonu, anlatım dili ve genel yönü
+Destroy Games
+
+Game Design
+Oynanış mekanikleri, sistemler ve deneyim tasarımı
+Destroy Games
+
+Programming
+Oyun mantığı, teknik altyapı ve sistem geliştirme
+Destroy Games
+
+Visual Design
+Görsel kimlik, atmosfer ve sanat dili
+Destroy Games
+
+Narrative & World Building
+Hikâye yapısı, evren kurgusu ve karakter altyapısı
+Destroy Games
+
+
+UI / UX Design
+Kullanıcı arayüzü ve oyuncu deneyimi tasarımı
+Destroy Games
+
+
+Audio Integration
+Seslerin oyun dünyasına uyarlanması
+Destroy Music
+
+
+Quality Assurance & Testing
+Test süreçleri, hata tespiti ve denge kontrolleri
+Destroy Games
+
+
+Production Support
+Organizasyon, koordinasyon ve yayın desteği
+Destroy Studios
+
+
+Özel Teşekkür / Special Thanks
+Tayfun Erkan, corder_32
+
+Ek Teşekkür / Additional Thanks
+Bu projeye inananlar
+Uykusuz gecelere dayananlar
+Doğru soruları soranlar
+
+Disclaimer
+
+Bu bir kurgu eseridir. Gerçek kişilerle, yaşayan veya ölü ya da gerçek olaylarla herhangi bir benzerlik tamamen tesadüftür. Oyunun amacı gerçek hayattaki adaletsizlikle mücadele etmektir. Birleşmiş Milletler (BM), Birleşmiş Milletler Kalkınma Programı (UNDP), Dünya Bankası, Dünya Sağlık Örgütü (WHO), Uluslararası Çalışma Örgütü (ILO) ve benzeri kuruluşların raporlarına göre; yoksulluk, açlık, eşitsizlik, hukuki temsil eksikliği ve cezasızlık dikkate alındığında dünya nüfusunun yaklaşık %50–%60’ının adaletsizlikten etkilendiği değerlendirilmektedir.`;
+
+        function buildCredits() {
+            const container = document.getElementById('dynamicCredits');
+            const lines = creditsData.split('\n');
+            let html = "";
+            let isSectionStart = true;
+            let hasOpenSection = false;
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) {
+                    isSectionStart = true;
+                    return;
+                }
+
+                if (isSectionStart) {
+                    if (hasOpenSection) html += "</div>";
+                    html += `<div class="credits-section"><div class="credits-title">${trimmed}</div>`;
+                    hasOpenSection = true;
+                    isSectionStart = false;
+                } else {
+                    if (trimmed.length > 30 || trimmed.includes('Oyunun') || trimmed.includes('Seslerin')) {
+                        html += `<div class="credits-desc">${trimmed}</div>`;
+                    } else {
+                        html += `<div class="credits-name">${trimmed}</div>`;
+                    }
+                }
+            });
+            if (hasOpenSection) html += "</div>";
+            container.innerHTML = html;
+        }
+
+        function startFinalCredits() {
+            playClickSound();
+            buildCredits();
+            const overlay = document.getElementById('creditsOverlay');
+            const content = document.getElementById('creditsContent');
+            overlay.style.display = 'flex';
+            
+            audioPool.creditsTheme.play().then(() => {
+                const scrollHeight = content.offsetHeight + window.innerHeight;
+                
+                // Fixed duration: 1 minute 50 seconds (110000 ms)
+                content.animate([
+                    { top: '100%' },
+                    { top: `-${content.offsetHeight}px` }
+                ], {
+                    duration: 160000, 
+                    easing: 'linear',
+                    fill: 'forwards'
+                });
+
+                // Since duration is fixed, we set audio behavior to match or handle ending separately
+                // We keep the music playing, if it's shorter/longer it doesn't break the visual timing
+                audioPool.creditsTheme.onended = () => {
+                    location.reload();
+                };
+            }).catch(e => {
+                console.error("Audio error", e);
+                location.reload();
+            });
+        }
+
+        function closeModal() { audioPool.close.currentTime = 0; audioPool.close.play().catch(()=>{}); document.getElementById('docModal').classList.add('hidden'); }
+        function toggleNotes() { playClickSound(); document.getElementById('notesPanel').classList.toggle('hidden'); }
+
+        window.onload = () => { 
+            applyAudioVolumes(); 
+            // Yatay mod kilidi
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {});
+            }
+        };
     </script>
 </body>
 </html>
