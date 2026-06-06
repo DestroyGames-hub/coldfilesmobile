@@ -955,7 +955,27 @@
             const tabH = 10;
             const gap = 10;
             const cols = Math.max(1, Math.floor(vw / (cardW + gap)));
-            const allDocKeys = Object.keys(documents);
+
+            // Ekrana sigan maksimum satir sayisi (gorunur alan icin)
+            const visibleH = window.innerHeight - headerH;
+            const rows = Math.max(2, Math.floor(visibleH / (cardH + tabH + gap)));
+            const totalSlots = cols * rows;
+
+            // Her bolumdeki dokuman sayisi (onceki bolumlerden toplam)
+            // Her bolum kendi slot araligina dusuyor: chapter-1 bazli offset
+            // Ama slot sayisi sinirsiz degil — totalSlots ile mod alinarak ekran icinde kalir
+            // Her bolumdeki doc sayisi farkli, onceki bolumlerdeki doc sayisini bul
+            const allDocsByChapter = {};
+            Object.values(documents).forEach(d => {
+                if (!allDocsByChapter[d.chapter]) allDocsByChapter[d.chapter] = 0;
+                allDocsByChapter[d.chapter]++;
+            });
+
+            // Bu bolumden onceki toplam doc sayisi
+            let prevCount = 0;
+            for (let c = 1; c < level; c++) {
+                prevCount += (allDocsByChapter[c] || 0);
+            }
 
             newDocs.forEach((key, index) => {
                 const doc = documents[key];
@@ -964,9 +984,10 @@
                 div.className = 'document tossed';
                 div.id = 'doc-'+doc.id;
 
-                const globalIndex = allDocKeys.indexOf(key);
-                const col = globalIndex % cols;
-                const row = Math.floor(globalIndex / cols);
+                // Slot index: onceki bolumlerin toplamina gore, totalSlots icinde kalir
+                const slotIndex = (prevCount + index) % totalSlots;
+                const col = slotIndex % cols;
+                const row = Math.floor(slotIndex / cols);
 
                 const baseX = col * (cardW + gap) + gap;
                 const baseY = headerH + tabH + gap + row * (cardH + tabH + gap);
@@ -995,9 +1016,7 @@
                 desk.appendChild(div);
             });
 
-            const totalRows = Math.ceil(allDocKeys.length / cols);
-            const neededH = headerH + tabH + gap + totalRows * (cardH + tabH + gap) + 60;
-            desk.style.minHeight = Math.max(window.innerHeight - 40, neededH) + 'px';
+            desk.style.minHeight = (window.innerHeight - 40) + 'px';
         }
 
         function makeDraggable(el) {
