@@ -667,33 +667,33 @@
     </div>
 
     <!-- GAME OVER SCREEN: RESMİ RAPOR -->
-    <div id="gameOverScreen" class="fixed inset-0 bg-black z-[3000] hidden flex flex-col items-center justify-center p-3 overflow-y-auto">
-        <div class="report-paper max-w-4xl w-full relative my-4">
+    <div id="gameOverScreen" class="fixed inset-0 bg-black z-[3000] hidden flex flex-col items-center justify-center p-2" style="overflow:hidden;">
+        <div class="report-paper w-full relative" style="max-width:100%; height:100vh; max-height:100vh; box-sizing:border-box; display:flex; flex-direction:column; padding:0.75rem; transform:none; min-height:unset; overflow:hidden;">
             
-            <div class="report-header">
-                <div class="text-[12px] text-black font-bold uppercase tracking-[0.4em] mb-2">T.C. ADALET BAKANLIĞI</div>
-                <div class="text-[10px] text-gray-600 font-mono">CİNAYET BÜRO AMİRLİĞİ | VAKA: KIZIL EJDER</div>
-                <div class="text-2xl mt-4 font-bold border-t border-b border-black py-2 inline-block">VAKA KAPANIŞ RAPORU</div>
+            <div class="report-header" style="padding-bottom:0.5rem; margin-bottom:0.5rem; flex-shrink:0;">
+                <div class="text-[10px] text-black font-bold uppercase tracking-[0.3em] mb-1">T.C. ADALET BAKANLIĞI</div>
+                <div class="text-[8px] text-gray-600 font-mono">CİNAYET BÜRO AMİRLİĞİ | VAKA: KIZIL EJDER</div>
+                <div class="text-base mt-1 font-bold border-t border-b border-black py-1 inline-block" style="font-family:'Special Elite',cursive;">VAKA KAPANIŞ RAPORU</div>
             </div>
 
-            <div class="report-body relative min-h-[200px] mb-12">
+            <div class="report-body relative" style="flex:1 1 auto; overflow:hidden; min-height:0; margin-bottom:0.5rem; font-size:0.72rem; line-height:1.5;">
                 <span id="endText"></span><span id="telegraphCursor" class="cursor hidden"></span>
             </div>
 
-            <div class="flex justify-between items-end mt-8 border-t border-gray-400 pt-6">
-                <div class="text-xs text-gray-500 font-mono">
+            <div class="flex justify-between items-end border-t border-gray-400 pt-2" style="flex-shrink:0; position:relative; min-height:60px;">
+                <div style="font-size:0.6rem;" class="text-gray-500 font-mono">
                     <p>RAPORTÖR: BAŞKOMİSER</p>
                     <p>TARİH: <span id="currentDate"></span></p>
                     <p>İMZA: @é&</p>
                 </div>
                 
                 <!-- STAMP AREA -->
-                <div id="finalStamp" class="final-stamp-box"></div>
+                <div id="finalStamp" class="final-stamp-box" style="width:90px; bottom:0; right:10px;"></div>
             </div>
 
-            <!-- Retry button overlaid -->
-            <div id="restartContainer" class="hidden absolute -bottom-20 left-0 w-full text-center">
-                 <button onclick="startFinalCredits()" class="border border-stone-500 bg-black text-stone-400 px-8 py-3 hover:border-white hover:text-white transition-all uppercase text-xs tracking-[0.3em]">Oyunu Bitir</button>
+            <!-- Retry button -->
+            <div id="restartContainer" class="hidden w-full text-center" style="flex-shrink:0; padding-top:0.5rem;">
+                 <button onclick="startFinalCredits()" class="border border-stone-500 bg-black text-stone-400 px-6 py-2 hover:border-white hover:text-white transition-all uppercase text-xs tracking-[0.3em]">Oyunu Bitir</button>
             </div>
         </div>
     </div>
@@ -904,6 +904,7 @@
 
         function startGame() {
             playClickSound();
+            wrongChoices = [];
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('gameHeader').classList.remove('hidden');
             document.getElementById('desk').classList.remove('opacity-0');
@@ -1135,10 +1136,47 @@
             modal.classList.remove('hidden');
         }
 
+        // Yanlış seçimleri takip et
+        let wrongChoices = [];
+
         function checkAnswer(level, isCorrect) {
             playClickSound();
-            if (isCorrect) { hideChoiceModal(); loadLevel(level + 1); }
-            else { audioPool.error.currentTime = 0; audioPool.error.play().catch(()=>{}); const desc = document.getElementById('choiceDesc'); desc.innerHTML = "<span class='text-red-600 font-bold'>YANLIŞ ÇIKARIM. DOSYALARI TEKRAR OKU.</span>"; setTimeout(() => { desc.innerText = chapterQuizzes[level].desc; }, 2000); }
+            if (isCorrect) { 
+                hideChoiceModal(); 
+                loadLevel(level + 1); 
+            } else { 
+                // Yanlış seçim: oyun yolunu saptır
+                audioPool.error.currentTime = 0; 
+                audioPool.error.play().catch(()=>{});
+                wrongChoices.push(level);
+                hideChoiceModal();
+                // Alternatif yol bildirimi göster
+                showWrongPathNotify(level);
+                loadLevel(level + 1); 
+            }
+        }
+
+        const wrongPathMessages = {
+            1: { title: "YANLIŞ İZ", desc: "Dosyalar karıştı. Dedektif yanlış yola girdi..." },
+            2: { title: "ÇELIŞEN İFADE", desc: "Şüphelilerden biri sizi yanılttı. Soruşturma rayından çıkıyor." },
+            3: { title: "SAHTE DELİL", desc: "Laboratu ar raporu yanlış yorumlandı. Asıl katil kazanıyor." },
+            4: { title: "PARA İZİ KAYBOLDU", desc: "Mali transferler yanlış okundu. Örgüt izlerini kapatıyor." },
+            5: { title: "TANIK SUSUYOR", desc: "Yanlış değerlendirme tanığı korkuttu. Gerçek gömülüyor." },
+            6: { title: "BAĞLANTI KESİLDİ", desc: "Derin bağlantı atlandı. Asıl yönetici serbest kalıyor." },
+            7: { title: "DOKTOR KAÇTI", desc: "Nihat tehlikeyi fark etti. Panzehiri imha etti." },
+            8: { title: "CEMİL UYARILDI", desc: "Avukat kaçış planını devreye soktu." },
+            9: { title: "GÜNLÜK YANDI", desc: "Günlük imha edildi. Son kanıt yok oldu." }
+        };
+
+        function showWrongPathNotify(level) {
+            const msg = wrongPathMessages[level] || { title: "HATA", desc: "Soruşturma saptı." };
+            const n = document.getElementById('levelNotify');
+            const t = document.getElementById('lvlTitle');
+            const d = document.getElementById('lvlDesc');
+            t.innerText = msg.title;
+            t.style.color = '#7a0000';
+            d.innerText = msg.desc;
+            n.style.display = 'block';
         }
 
         function showFinalAccusation() {
@@ -1168,10 +1206,18 @@
 
         async function solve(name) {
             playClickSound(); const scr = document.getElementById('gameOverScreen'); document.getElementById('choiceModal').classList.add('hidden'); scr.classList.remove('hidden');
-            let finalMessage = (name === "AVUKAT CEMİL & DR. NİHAT") ? 
-                "Yürütülen titiz ve kapsamlı soruşturma neticesinde, birincil şüpheli Avukat Cemil Soykan yurt dışına firar teşebbüsü esnasında kolluk kuvvetlerince derdest edilmiştir. Gözaltına alınan Dr. Nihat; maktul Vedat Korhan’ın ilaçlarını sistematik bir biçimde değiştirdiğini ve süreci şüpheli Cemil Soykan’ın talimatları doğrultusunda yönettiğini itiraf etmiştir. Operasyon dahilinde 'Gölge' yapılanması tamamen tasfiye edilmiş, söz konusu suç örgütüyle bağlantılı 1999 tarihli Hikmet Korhan dosyası yeniden incelemeye alınmıştır. Adli süreç tamamlanmış olup adalet tesis edilmiştir." : 
-                "Söz konusu soruşturma, delil toplama ve derinleştirme safhalarında yüzeysel kalmış; tahkikat yalnızca Yasemin Vural ve Kerem Soylu gibi alt düzey iştirakçilerle sınırlı tutulmuştur. Suç organizasyonunun asıl yönetici kadrosunun firarına engel olunamamış, Vedat Korhan’a ait mirasın 'Gölge' yapılanmasına aktarımı önlenememiştir. Somut delil yetersizliği ve asıl faillere ulaşılamaması nedeniyle ilgili dosya, 'faili meçhul' statüsünde arşive kaldırılmıştır.";
-            
+            const isCorrect = (name === "AVUKAT CEMİL & DR. NİHAT");
+            const mistakeCount = wrongChoices.length;
+            let finalMessage;
+            if (isCorrect && mistakeCount === 0) {
+                finalMessage = "Yürütülen titiz ve kusursuz soruşturma neticesinde, birincil şüpheli Avukat Cemil Soykan yurt dışına firar teşebbüsü esnasında kolluk kuvvetlerince derdest edilmiştir. Dr. Nihat tüm suç ortaklığını itiraf etmiştir. 'Gölge' yapılanması kökten tasfiye edilmiş, 1999 tarihli Hikmet Korhan dosyası yeniden açılmıştır. Her iz doğru okundu; adalet tam anlamıyla tesis edildi. — SONUÇ: MÜKEMMEL SORUŞTURMA.";
+            } else if (isCorrect && mistakeCount <= 3) {
+                finalMessage = "Soruşturma sürecinde bazı yanlış izler takip edilmiş olsa da nihai değerlendirmede Avukat Cemil Soykan ve Dr. Nihat suçlu olarak tespit edilmiştir. Cemil ülke dışına kaçmaya çalışırken yakalanmıştır. Ancak soruşturmadaki aksaklıklar nedeniyle 'Gölge' yapılanmasının üst kademeleri hâlâ gizde kalmaktadır. Dava kapatıldı — ama hikâye bitmedi. — SONUÇ: KISMI BAŞARI.";
+            } else if (isCorrect && mistakeCount > 3) {
+                finalMessage = "Soruşturma boyunca pek çok yanlış iz takip edilmiş; suç örgütüne iz kapatma fırsatı tanınmıştır. Son anda Avukat Cemil Soykan doğru tespit edilmiş, ancak kilit delillerin büyük bölümü geçersiz sayılmıştır. Cemil tutuklanmış, fakat avukatları yetersiz delil gerekçesiyle tahliye başvurusunda bulunmuştur. 'Gölge' örgütü çözümsüz kalmaya devam etmektedir. — SONUÇ: PİRİK ZAFER.";
+            } else {
+                finalMessage = "Söz konusu soruşturma, delil toplama ve derinleştirme safhalarında yüzeysel kalmış; tahkikat yalnızca alt düzey iştirakçilerle sınırlı tutulmuştur. Avukat Cemil Soykan gün batmadan Türkiye'yi terk etmiştir. Vedat Korhan'a ait mirasın 'Gölge' yapılanmasına aktarımı önlenememiştir. Somut delil yetersizliği nedeniyle ilgili dosya, 'faili meçhul' statüsünde arşive kaldırılmıştır. — SONUÇ: BAŞARISIZ.";
+            }
             await typeWriter(finalMessage, 'endText');
             const stampEl = document.getElementById('finalStamp'); stampEl.classList.remove('stamp-animate'); 
             stampEl.innerHTML = `<img src="https://i.ibb.co/tTBb54y4/Emniuyet-Genel-M-d-rl.png" alt="Emniyet Damgası" />`;
@@ -1297,7 +1343,7 @@ Bu bir kurgu eseridir. Gerçek kişilerle, yaşayan veya ölü ya da gerçek ola
                     { top: '100%' },
                     { top: `-${content.offsetHeight}px` }
                 ], {
-                    duration: 160000, 
+                    duration: 90000, 
                     easing: 'linear',
                     fill: 'forwards'
                 });
